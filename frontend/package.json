@@ -1,0 +1,24 @@
+{
+  "name": "stamon-playground",
+  "version": "0.0.0",
+  "description": "Stamon Playground with SolidJS",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.3.5",
+    "vite-plugin-solid": "^2.10.2",
+    "terser": "^5.31.3",
+    "@suid/vite-plugin": "^0.2.0",
+    "vite-plugin-minify": "^1.5.2"
+  },
+  "dependencies": {
+    "@suid/material": "^0.16.0",
+    "solid-js": "^1.8.19",
+    "solid-prism-editor": "^1.1.0"
+  }
+}
