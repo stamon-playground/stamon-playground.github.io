@@ -4,8 +4,6 @@ import Toolbar from "@suid/material/Toolbar"
 import AppBar from "@suid/material/AppBar"
 import Typography from "@suid/material/Typography"
 import Button from "@suid/material/Button"
-import Grid from "@suid/material/Grid"
-import Paper from "@suid/material/Paper"
 import { createSignal } from "solid-js"
 import { Editor } from "solid-prism-editor"
 import { basicSetup } from "solid-prism-editor/setups"
@@ -117,7 +115,7 @@ languageMap.stamon = {
   ],
   autoCloseTags([start, _end, _direction], value) {
     let match = /<(\w+)\b.*>/.exec(getLineBefore(value, start) + ">")
-		return match && `</${match[1]}>`
+    return match && `</${match[1]}>`
   },
 }
 
@@ -147,7 +145,7 @@ export default () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', paddingBottom: "1em"}}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', paddingBottom: "1em" }}>
       <CssBaseline />
       <AppBar position="sticky" color="inherit" elevation={3}>
         <Toolbar>
@@ -157,58 +155,30 @@ export default () => {
           <Button color="inherit" variant="outlined" onClick={handleInput}>Run</Button>
         </Toolbar>
       </AppBar>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 16px 1fr' }, height: '100%', minHeight: 0 }}>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: '1fr 16px 1fr' },
+        gridTemplateRows: { xs: '1fr 16px 1fr', md: 'auto' },
+        height: '100%',
+        minHeight: 0
+      }}>
         <Editor
           language="stamon"
           tabSize={4}
           extensions={basicSetup}
           onUpdate={setInput}
           value={exampleCode}
-          style={{ height: '100%' }}
         />
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography variant="h6">::</Typography>
         </Box>
-          <Editor
-            readOnly
-            value={output()}
-            style={{ height: '100%' }}
-            lineNumbers={false}
-          />
+        <Editor
+          readOnly
+          value={output()}
+          style={{ height: '100%' }}
+          lineNumbers={false}
+        />
       </Box>
     </Box>
   );
-
-  // return (
-  //   <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-  //     <CssBaseline />
-  //     <AppBar position="sticky" color="inherit" elevation={3}>
-  //       <Toolbar>
-  //         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-  //           Stamon Playground
-  //         </Typography>
-  //         <Button color="inherit" variant="outlined" onClick={handleInput}>Run</Button>
-  //       </Toolbar>
-  //     </AppBar>
-  //     <Box sx={{ height: '100%' }}>
-  //       <Grid container spacing={2} sx={{ flex: 1 }}>
-  //         <Grid item xs={12} md={7} sx={{ display: 'flex', flexDirection: 'column' }}>
-  //           <Editor
-  //             language="stamon"
-  //             tabSize={4}
-  //             style={{ flex: 1 }}
-  //             extensions={basicSetup}
-  //             onUpdate={setInput}
-  //             value={exampleCode}
-  //           />
-  //         </Grid>
-  //         <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column' }}>
-  //           <Paper variant="outlined" sx={{ flex: 1 }}>
-  //             <Editor readOnly style={{ flex: 1 }} value={output()} lineNumbers={false} />
-  //           </Paper>
-  //         </Grid>
-  //       </Grid>
-  //     </Box>
-  //   </Box>
-  // );
 }
