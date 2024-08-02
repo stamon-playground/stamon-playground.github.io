@@ -18,6 +18,12 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(solid-js@1.8.19)
     devDependencies:
+      '@eslint/compat':
+        specifier: ^1.1.1
+        version: 1.1.1
+      '@eslint/js':
+        specifier: ^9.8.0
+        version: 9.8.0
       '@suid/vite-plugin':
         specifier: ^0.2.0
         version: 0.2.0(vite@5.3.5(terser@5.31.3))
@@ -262,6 +268,14 @@ packages:
     engines: {node: '>=12'}
     cpu: [x64]
     os: [win32]
+
+  '@eslint/compat@1.1.1':
+    resolution: {integrity: sha512-lpHyRyplhGPL5mGEh6M9O5nnKk0Gz4bFI+Zu6tKlPpDUN7XshWvH9C/px4UVm87IAANE0W81CEsNGbS1KlzXpA==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@eslint/js@9.8.0':
+    resolution: {integrity: sha512-MfluB7EUfxXtv3i/++oh89uzAr4PDI4nn201hsp+qaXqsjAWzinlZEHEfPgAX4doIlKvPG/i0A9dpKxOLII8yA==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@jridgewell/gen-mapping@0.3.5':
     resolution: {integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==}
@@ -931,6 +945,10 @@ snapshots:
 
   '@esbuild/win32-x64@0.21.5':
     optional: true
+
+  '@eslint/compat@1.1.1': {}
+
+  '@eslint/js@9.8.0': {}
 
   '@jridgewell/gen-mapping@0.3.5':
     dependencies:
