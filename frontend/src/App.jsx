@@ -5,12 +5,16 @@ import Toolbar from "@suid/material/Toolbar"
 import AppBar from "@suid/material/AppBar"
 import Typography from "@suid/material/Typography"
 import Button from "@suid/material/Button"
+import Menu from "@suid/material/Menu"
+import MenuItem from "@suid/material/MenuItem"
+import ListItemIcon from '@suid/material/ListItemIcon'
+import ListItemText from '@suid/material/ListItemText'
+import Checkbox from '@suid/material/Checkbox'
+import IconButton from '@suid/material/IconButton'
 import { createPalette } from "@suid/material/styles/createPalette"
 import { ThemeProvider, createTheme } from '@suid/material/styles'
 import useMediaQuery from '@suid/material/useMediaQuery'
-import IconButton from '@suid/material/IconButton'
-import DarkModeOutlinedIcon from "@suid/icons-material/DarkModeOutlined"
-import LightModeOutlinedIcon from "@suid/icons-material/LightModeOutlined"
+import MenuIcon from "@suid/icons-material/Menu"
 import { Editor, languageMap } from "solid-prism-editor"
 import { loadTheme } from "solid-prism-editor/themes"
 import { basicSetup } from "solid-prism-editor/setups"
@@ -128,15 +132,17 @@ import std;
 print("Hello world!");
 `
 
-const getSavedDarkMode = () => {
-  const value = localStorage.getItem("darkMode");
+const getSavedLocalStorage = (key) => {
+  const value = localStorage.getItem(key);
   if (value === "true") return true;
   if (value === "false") return false;
 }
 
-const saveDarkMode = (value) => {
-  localStorage.setItem("darkMode", value ? "true" : "false");
+const saveLocalStorage = (key, value) => {
+  localStorage.setItem(key, value ? "true" : "false");
 }
+
+import { useDrag } from 'solid-gesture'
 
 export default () => {
   const [input, setInput] = createSignal("");
@@ -144,16 +150,19 @@ export default () => {
   const [titleClickTimes, setTitleClickTimes] = createSignal(0);
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
-  const [darkMode, setDarkMode] = createSignal(getSavedDarkMode() ?? prefersDarkMode);
+  const [darkMode, setDarkMode] = createSignal(getSavedLocalStorage("darkMode") ?? prefersDarkMode);
   onMount(() => changeEditorTheme(darkMode()));
 
-  const palette = createMemo(() =>
-    createPalette({
-      mode: darkMode() ? "dark" : "light"
-    })
-  );
+  const palette = createMemo(() => {
+    const mode = darkMode() ? "dark" : "light"
+    const background = darkMode() ? { default: "#010409", paper: "#010409" } : undefined;
+    return createPalette({ mode, background })
+  })
 
   const theme = createTheme({ palette });
+
+  const isSmallScreen = () => window.innerWidth < theme.breakpoints.values.md
+  const [wordWrap, setWordWrap] = createSignal(getSavedLocalStorage("wordWrap") ?? isSmallScreen());
 
   const changeEditorTheme = (darkMode) => {
     loadTheme(darkMode ? "github-dark" : "github-light").then((theme) => {
@@ -163,10 +172,17 @@ export default () => {
   };
 
   const handleThemeToggle = () => {
-    const nextDarkMode = !darkMode();
-    setDarkMode(nextDarkMode);
-    saveDarkMode(nextDarkMode);
-    changeEditorTheme(nextDarkMode);
+    const nextDarkMode = !darkMode()
+    setDarkMode(nextDarkMode)
+    saveLocalStorage("darkMode", nextDarkMode)
+    changeEditorTheme(nextDarkMode)
+    setAnchorEl(null)
+  }
+
+  const handleWordWrapToggle = () => {
+    setWordWrap(!wordWrap())
+    saveLocalStorage("wordWrap", wordWrap())
+    setAnchorEl(null)
   }
 
   const handleInput = () => {
@@ -200,31 +216,17 @@ export default () => {
 
   const [leftFr, setLeftFr] = createSignal(1);
   const [rightFr, setRightFr] = createSignal(1);
-  const [isDragging, setIsDragging] = createSignal(false);
-  const [startPos, setStartPos] = createSignal({ x: 0, y: 0 });
-  const [containerSize, setContainerSize] = createSignal({ width: 0, height: 0 });
-  const [isVertical, setIsVertical] = createSignal(window.innerWidth < theme.breakpoints.values.md);
+  const [isVertical, setIsVertical] = createSignal(isSmallScreen());
 
   let containerRef;
 
-  const startDrag = (clientX, clientY) => {
-    setIsDragging(true);
-    setStartPos({ x: clientX, y: clientY });
-    setContainerSize({
+  const dragBind = useDrag(({ down, delta: [mx, my] }) => {
+    const { width, height } = {
       width: containerRef.offsetWidth,
       height: containerRef.offsetHeight,
-    });
-  };
+    }
 
-  const onMouseDown = (e) => startDrag(e.clientX, e.clientY);
-  const onTouchStart = (e) => startDrag(e.touches[0].clientX, e.touches[0].clientY);
-
-  const updateDrag = (clientX, clientY) => {
-    if (!isDragging()) return;
-
-    const { x: startX, y: startY } = startPos();
-    const { width, height } = containerSize();
-    const delta = isVertical() ? clientY - startY : clientX - startX;
+    const delta = isVertical() ? (down ? my : 0) : (down ? mx : 0);
     const size = isVertical() ? height : width;
     const deltaFr = (delta / size) * (leftFr() + rightFr());
 
@@ -233,23 +235,14 @@ export default () => {
 
     setLeftFr(newLeftFr);
     setRightFr(newRightFr);
+  })
 
-    setStartPos({ x: clientX, y: clientY });
-  };
+  const handleResize = () => setIsVertical(isSmallScreen())
+  onMount(() => window.addEventListener("resize", handleResize))
 
-  const onMouseMove = (e) => updateDrag(e.clientX, e.clientY);
-  const onTouchMove = (e) => {
-    updateDrag(e.touches[0].clientX, e.touches[0].clientY);
-    e.preventDefault();
-  };
-
-  const stopDrag = () => setIsDragging(false);
-  const handleResize = () => setIsVertical(window.innerWidth < 960);
-
-  onMount(() => {
-    window.addEventListener("resize", handleResize);
-    document.addEventListener("touchmove", onTouchMove, { passive: false });
-  });
+  const [anchorEl, setAnchorEl] = createSignal(null);
+  const openMenu = () => Boolean(anchorEl());
+  const handleClose = () => setAnchorEl(null);
 
   return (
     <ThemeProvider theme={theme}>
@@ -270,19 +263,44 @@ export default () => {
                 Stamon Playground
               </Show>
             </Typography>
-            <IconButton
-              color="inherit"
-              sx={{ marginRight: 2 }}
-              onClick={handleThemeToggle}
-            >
-              <Show
-                when={darkMode()}
-                fallback={<LightModeOutlinedIcon />}
-              >
-                <DarkModeOutlinedIcon />
-              </Show>
-            </IconButton>
             <Button color="inherit" variant="outlined" onClick={handleInput}>Run</Button>
+            <IconButton
+              aria-controls={openMenu() ? "long-menu" : undefined}
+              aria-expanded={openMenu() ? "true" : undefined}
+              aria-haspopup="true"
+              sx={{ marginLeft: 2 }}
+              onClick={(event) => setAnchorEl(event.currentTarget)}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="long-menu"
+              anchorEl={anchorEl()}
+              open={openMenu()}
+              onClose={handleClose}
+              PaperProps={{
+                sx: {
+                  overflow: "visible",
+                  marginTop: 2,
+                  width: "150px",
+                },
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+              <MenuItem dense onClick={handleThemeToggle}>
+                <ListItemIcon>
+                  <Checkbox size="small" sx={{ padding: 0 }} checked={darkMode()} />
+                </ListItemIcon>
+                <ListItemText>深色模式</ListItemText>
+              </MenuItem>
+              <MenuItem dense onClick={handleWordWrapToggle}>
+                <ListItemIcon>
+                  <Checkbox size="small" sx={{ padding: 0 }} checked={wordWrap()} />
+                </ListItemIcon>
+                <ListItemText>自动换行</ListItemText>
+              </MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
         <Box
@@ -296,10 +314,6 @@ export default () => {
             gridTemplateColumns: { xs: '1fr', md: `${leftFr()}fr 16px ${rightFr()}fr` },
             gridTemplateRows: { xs: `${leftFr()}fr 16px ${rightFr()}fr`, md: 'auto' },
           }}
-          onMouseMove={onMouseMove}
-          onMouseUp={stopDrag}
-          onTouchMove={onTouchMove}
-          onTouchEnd={stopDrag}
         >
           <style id="prism-theme" />
           <EditorWrapper>
@@ -309,6 +323,7 @@ export default () => {
               extensions={basicSetup}
               onUpdate={setInput}
               value={exampleCode}
+              wordWrap={wordWrap()}
               style={{ height: '100%' }}
             />
           </EditorWrapper>
@@ -319,17 +334,25 @@ export default () => {
               justifyContent: 'center',
               cursor: { xs: 'row-resize', md: 'col-resize' },
               userSelect: 'none',
+              touchAction: 'none',
             }}
-            onMouseDown={onMouseDown}
-            onTouchStart={onTouchStart}
+            {...dragBind()}
           >
-            <Typography variant="button">⣿</Typography>
+            <Typography
+              variant="button"
+              sx={{
+                transform: { xs: 'rotate(90deg)', md: 'rotate(0deg)' },
+              }}
+            >
+              ⣿
+            </Typography>
           </Box>
           <EditorWrapper>
             <Editor
               readOnly
               value={output()}
               lineNumbers={false}
+              wordWrap={wordWrap()}
               extensions={[]}
               style={{ height: '100%' }}
             />

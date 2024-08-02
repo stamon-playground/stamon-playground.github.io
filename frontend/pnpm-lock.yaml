@@ -14,6 +14,9 @@ importers:
       '@suid/material':
         specifier: ^0.16.0
         version: 0.16.0(solid-js@1.8.19)
+      solid-gesture:
+        specifier: ^0.0.3
+        version: 0.0.3(solid-js@1.8.19)
       solid-js:
         specifier: ^1.8.19
         version: 1.8.19
@@ -442,6 +445,9 @@ packages:
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
 
+  '@use-gesture/core@10.3.1':
+    resolution: {integrity: sha512-WcINiDt8WjqBdUXye25anHiNxPc0VOrlT8F6LLkU6cycrOGUDyY/yyFmsg3k8i5OLvv25llc0QC45GhR/C8llw==}
+
   acorn@8.12.1:
     resolution: {integrity: sha512-tcpGyI9zbizT9JbV6oYE477V6mTlXvvi0T0G3SNIYE2apm/G5huBa1+K89VGeovbg+jycCrfhl3ADxErOuO6Jg==}
     engines: {node: '>=0.4.0'}
@@ -651,6 +657,11 @@ packages:
   seroval@1.1.1:
     resolution: {integrity: sha512-rqEO6FZk8mv7Hyv4UCj3FD3b6Waqft605TLfsCe/BiaylRpyyMC0b+uA5TJKawX3KzMrdi3wsLbCaLplrQmBvQ==}
     engines: {node: '>=10'}
+
+  solid-gesture@0.0.3:
+    resolution: {integrity: sha512-7vbhm+eYXXqr0y9/uVMHknscn9THHozx4wA0SEUwVsRjEPUd1Y9BKWDaG2s+GZafAEEucr7bWsMQKb49c0X1Fw==}
+    peerDependencies:
+      solid-js: '>=1.4.0'
 
   solid-js@1.8.19:
     resolution: {integrity: sha512-h8z/TvTQYsf894LM9Iau/ZW2iAKrCzAWDwjPhMcXnonmW1OIIihc28wp82b1wwei1p81fH5+gnfNOe8RzLbDRQ==}
@@ -1117,6 +1128,8 @@ snapshots:
 
   '@types/estree@1.0.5': {}
 
+  '@use-gesture/core@10.3.1': {}
+
   acorn@8.12.1: {}
 
   ansi-styles@3.2.1:
@@ -1329,6 +1342,11 @@ snapshots:
       seroval: 1.1.1
 
   seroval@1.1.1: {}
+
+  solid-gesture@0.0.3(solid-js@1.8.19):
+    dependencies:
+      '@use-gesture/core': 10.3.1
+      solid-js: 1.8.19
 
   solid-js@1.8.19:
     dependencies:
