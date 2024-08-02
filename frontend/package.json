@@ -12,6 +12,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@suid/icons-material": "^0.7.0",
     "@suid/material": "^0.16.0",
     "solid-js": "^1.8.19",
     "solid-prism-editor": "^1.1.0"

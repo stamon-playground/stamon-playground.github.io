@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@suid/icons-material':
+        specifier: ^0.7.0
+        version: 0.7.0(solid-js@1.8.19)
       '@suid/material':
         specifier: ^0.16.0
         version: 0.16.0(solid-js@1.8.19)
@@ -388,6 +391,11 @@ packages:
 
   '@suid/css@0.4.0':
     resolution: {integrity: sha512-yzHAlf1CVi7n0SvUrMgs8Z49UiS9669+td1w1frekhRQuRbkXhHoyJkvovaDVJlWRmCPA8Q0f1OTr0uDCUg9mQ==}
+
+  '@suid/icons-material@0.7.0':
+    resolution: {integrity: sha512-d40gG5GBE/UrUYvVkf53zzhmNIV9eb4z52DUON2fGidprf/LkD4WdamwHKS1QfElvHnuaOci1VjV6cHdblzPBQ==}
+    peerDependencies:
+      solid-js: ^1.8.16
 
   '@suid/material@0.16.0':
     resolution: {integrity: sha512-qr/xdkl8Ekp+GO4m5VhXLi/CBrmUXALc8MP75p8y+0ZMXB+RLwSsZK1z1i9EjmEsmR5RC6G9VFJPWrpMI7j32A==}
@@ -1033,6 +1041,11 @@ snapshots:
       solid-js: 1.8.19
 
   '@suid/css@0.4.0': {}
+
+  '@suid/icons-material@0.7.0(solid-js@1.8.19)':
+    dependencies:
+      '@suid/material': 0.16.0(solid-js@1.8.19)
+      solid-js: 1.8.19
 
   '@suid/material@0.16.0(solid-js@1.8.19)':
     dependencies:
