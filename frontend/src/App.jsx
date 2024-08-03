@@ -16,9 +16,10 @@ import { ThemeProvider, createTheme } from '@suid/material/styles'
 import useMediaQuery from '@suid/material/useMediaQuery'
 import MenuIcon from "@suid/icons-material/Menu"
 import { Editor, languageMap } from "solid-prism-editor"
-import { loadTheme } from "solid-prism-editor/themes"
 import { basicSetup } from "solid-prism-editor/setups"
 import { languages } from "solid-prism-editor/prism"
+import GithubLight from "solid-prism-editor/themes/github-light.css?inline"
+import GithubDark from "solid-prism-editor/themes/github-dark.css?inline"
 import stamon from "./stamon"
 
 import "solid-prism-editor/layout.css"
@@ -165,10 +166,9 @@ export default () => {
   const [wordWrap, setWordWrap] = createSignal(getSavedLocalStorage("wordWrap") ?? isSmallScreen());
 
   const changeEditorTheme = (darkMode) => {
-    loadTheme(darkMode ? "github-dark" : "github-light").then((theme) => {
-      const style = document.getElementById("prism-theme");
-      style.textContent = theme;
-    });
+    const theme = darkMode ? GithubDark : GithubLight
+    const style = document.getElementById("prism-theme")
+    style.textContent = theme
   };
 
   const handleThemeToggle = () => {
@@ -265,7 +265,7 @@ export default () => {
             </Typography>
             <Button color="inherit" variant="outlined" onClick={handleInput}>Run</Button>
             <IconButton
-              aria-controls={openMenu() ? "long-menu" : undefined}
+              aria-controls={openMenu() ? "function-menu" : undefined}
               aria-expanded={openMenu() ? "true" : undefined}
               aria-haspopup="true"
               sx={{ marginLeft: 2 }}
@@ -274,7 +274,7 @@ export default () => {
               <MenuIcon />
             </IconButton>
             <Menu
-              id="long-menu"
+              id="function-menu"
               anchorEl={anchorEl()}
               open={openMenu()}
               onClose={handleClose}
@@ -292,7 +292,7 @@ export default () => {
                 <ListItemIcon>
                   <Checkbox size="small" sx={{ padding: 0 }} checked={darkMode()} />
                 </ListItemIcon>
-                <ListItemText>深色模式</ListItemText>
+                <ListItemText>深色主题</ListItemText>
               </MenuItem>
               <MenuItem dense onClick={handleWordWrapToggle}>
                 <ListItemIcon>

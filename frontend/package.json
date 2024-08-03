@@ -1,14 +1,15 @@
 {
   "name": "stamon-playground",
+  "shortname": "Stamon",
+  "fullname": "Stamon Playground",
   "version": "0.0.0",
-  "description": "Stamon Playground with SolidJS",
+  "description": "Run stamon in a one-click playground",
+  "type": "module",
   "scripts": {
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix"
+    "serve": "vite preview"
   },
   "license": "MIT",
   "dependencies": {
@@ -19,12 +20,11 @@
     "solid-prism-editor": "^1.1.0"
   },
   "devDependencies": {
-    "@eslint/compat": "^1.1.1",
-    "@eslint/js": "^9.8.0",
     "@suid/vite-plugin": "^0.2.0",
     "terser": "^5.31.3",
     "vite": "^5.3.5",
     "vite-plugin-minify": "^1.5.2",
+    "vite-plugin-pwa": "^0.20.1",
     "vite-plugin-solid": "^2.10.2"
   }
 }
