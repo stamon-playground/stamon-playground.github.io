@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@suid/icons-material':
-        specifier: ^0.7.0
-        version: 0.7.0(solid-js@1.8.19)
+      '@mdi/js':
+        specifier: ^7.4.47
+        version: 7.4.47
       '@suid/material':
         specifier: ^0.16.0
         version: 0.16.0(solid-js@1.8.19)
@@ -796,6 +796,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
+  '@mdi/js@7.4.47':
+    resolution: {integrity: sha512-KPnNOtm5i2pMabqZxpUz7iQf+mfrYZyKCZ8QNz85czgEt7cuHcGorWfdzUMWYA0SD+a6Hn4FmJ+YhzzzjkTZrQ==}
+
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
@@ -935,11 +938,6 @@ packages:
 
   '@suid/css@0.4.0':
     resolution: {integrity: sha512-yzHAlf1CVi7n0SvUrMgs8Z49UiS9669+td1w1frekhRQuRbkXhHoyJkvovaDVJlWRmCPA8Q0f1OTr0uDCUg9mQ==}
-
-  '@suid/icons-material@0.7.0':
-    resolution: {integrity: sha512-d40gG5GBE/UrUYvVkf53zzhmNIV9eb4z52DUON2fGidprf/LkD4WdamwHKS1QfElvHnuaOci1VjV6cHdblzPBQ==}
-    peerDependencies:
-      solid-js: ^1.8.16
 
   '@suid/material@0.16.0':
     resolution: {integrity: sha512-qr/xdkl8Ekp+GO4m5VhXLi/CBrmUXALc8MP75p8y+0ZMXB+RLwSsZK1z1i9EjmEsmR5RC6G9VFJPWrpMI7j32A==}
@@ -2868,6 +2866,8 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.15
 
+  '@mdi/js@7.4.47': {}
+
   '@popperjs/core@2.11.8': {}
 
   '@rollup/plugin-babel@5.3.1(@babel/core@7.25.2)(@types/babel__core@7.20.5)(rollup@2.79.1)':
@@ -2980,11 +2980,6 @@ snapshots:
       solid-js: 1.8.19
 
   '@suid/css@0.4.0': {}
-
-  '@suid/icons-material@0.7.0(solid-js@1.8.19)':
-    dependencies:
-      '@suid/material': 0.16.0(solid-js@1.8.19)
-      solid-js: 1.8.19
 
   '@suid/material@0.16.0(solid-js@1.8.19)':
     dependencies:

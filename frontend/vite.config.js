@@ -18,6 +18,13 @@ export default defineConfig({
         name: packageInfo.fullname,
         short_name: packageInfo.shortname,
         description: packageInfo.description,
+        theme_color: '#ffffff',
+        icons: [{
+          src: 'logo.svg',
+          type: "image/svg+xml",
+          sizes: "any",
+          purpose: "any"
+        }]
       }
     })
   ],
@@ -37,12 +44,8 @@ export default defineConfig({
         entryFileNames: 'js/[name]-[hash].js',
         assetFileNames: '[ext]/[name]-[hash].[ext]',
         manualChunks: (id) => {
-          const chunkMap = {
-            'suid': 'suid',
-            'node_modules': 'vendor',
-            'stamon.js': 'stamon'
-          }
-          for (const key in chunkMap) if (id.includes(key)) return chunkMap[key]
+          if (id.includes('node_modules')) return 'vendor'
+          if (id.includes('stamon.js')) return 'stamon'
         }
       }
     }

@@ -7,14 +7,17 @@ import Typography from "@suid/material/Typography"
 import Button from "@suid/material/Button"
 import Menu from "@suid/material/Menu"
 import MenuItem from "@suid/material/MenuItem"
+import Divider from "@suid/material/Divider"
 import ListItemIcon from '@suid/material/ListItemIcon'
 import ListItemText from '@suid/material/ListItemText'
 import Checkbox from '@suid/material/Checkbox'
+import Link from '@suid/material/Link'
 import IconButton from '@suid/material/IconButton'
 import { createPalette } from "@suid/material/styles/createPalette"
 import { ThemeProvider, createTheme } from '@suid/material/styles'
 import useMediaQuery from '@suid/material/useMediaQuery'
-import MenuIcon from "@suid/icons-material/Menu"
+import SvgIcon from "@suid/material/SvgIcon"
+import { mdiGithub, mdiMenu } from '@mdi/js'
 import { Editor, languageMap } from "solid-prism-editor"
 import { basicSetup } from "solid-prism-editor/setups"
 import { languages } from "solid-prism-editor/prism"
@@ -271,7 +274,7 @@ export default () => {
               sx={{ marginLeft: 2 }}
               onClick={(event) => setAnchorEl(event.currentTarget)}
             >
-              <MenuIcon />
+              <SvgIcon><path d={mdiMenu} /></SvgIcon>
             </IconButton>
             <Menu
               id="function-menu"
@@ -299,6 +302,17 @@ export default () => {
                   <Checkbox size="small" sx={{ padding: 0 }} checked={wordWrap()} />
                 </ListItemIcon>
                 <ListItemText>自动换行</ListItemText>
+              </MenuItem>
+              <Divider />
+              <MenuItem
+                dense
+                component={Link}
+                href="https://github.com/CLimber-Rong/stamon" target="_blank"
+              >
+                <ListItemIcon>
+                  <SvgIcon><path d={mdiGithub} /></SvgIcon>
+                </ListItemIcon>
+                <ListItemText>Github</ListItemText>
               </MenuItem>
             </Menu>
           </Toolbar>
