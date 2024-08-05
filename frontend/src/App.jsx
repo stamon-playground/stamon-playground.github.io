@@ -18,6 +18,7 @@ import { ThemeProvider, createTheme } from '@suid/material/styles'
 import useMediaQuery from '@suid/material/useMediaQuery'
 import SvgIcon from "@suid/material/SvgIcon"
 import { mdiGithub, mdiMenu } from '@mdi/js'
+import { useDrag } from 'solid-gesture'
 import { Editor, languageMap } from "solid-prism-editor"
 import { basicSetup } from "solid-prism-editor/setups"
 import { languages } from "solid-prism-editor/prism"
@@ -145,8 +146,6 @@ const getSavedLocalStorage = (key) => {
 const saveLocalStorage = (key, value) => {
   localStorage.setItem(key, value ? "true" : "false");
 }
-
-import { useDrag } from 'solid-gesture'
 
 export default () => {
   const [input, setInput] = createSignal("");
