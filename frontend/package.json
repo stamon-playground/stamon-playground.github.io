@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@suid/vite-plugin": "^0.2.0",
-    "terser": "^5.31.3",
+    "terser": "^5.31.4",
     "vite": "^5.3.5",
     "vite-plugin-minify": "^1.5.2",
     "vite-plugin-pwa": "^0.20.1",

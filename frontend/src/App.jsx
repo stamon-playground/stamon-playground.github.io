@@ -137,13 +137,18 @@ import std;
 print("Hello world!");
 `
 
-const getSavedLocalStorage = (key) => {
+const getInitialCode = () => {
+  const code = localStorage.getItem("inputCode");
+  return code ? code : exampleCode;
+}
+
+const getBoolLocalStorage = (key) => {
   const value = localStorage.getItem(key);
   if (value === "true") return true;
   if (value === "false") return false;
 }
 
-const saveLocalStorage = (key, value) => {
+const saveBoolLocalStorage = (key, value) => {
   localStorage.setItem(key, value ? "true" : "false");
 }
 
@@ -153,7 +158,7 @@ export default () => {
   const [titleClickTimes, setTitleClickTimes] = createSignal(0);
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
-  const [darkMode, setDarkMode] = createSignal(getSavedLocalStorage("darkMode") ?? prefersDarkMode);
+  const [darkMode, setDarkMode] = createSignal(getBoolLocalStorage("darkMode") ?? prefersDarkMode);
   onMount(() => changeEditorTheme(darkMode()));
 
   const palette = createMemo(() => {
@@ -165,7 +170,7 @@ export default () => {
   const theme = createTheme({ palette });
 
   const isSmallScreen = () => window.innerWidth < theme.breakpoints.values.md
-  const [wordWrap, setWordWrap] = createSignal(getSavedLocalStorage("wordWrap") ?? isSmallScreen());
+  const [wordWrap, setWordWrap] = createSignal(getBoolLocalStorage("wordWrap") ?? isSmallScreen());
 
   const changeEditorTheme = (darkMode) => {
     const theme = darkMode ? GithubDark : GithubLight
@@ -173,21 +178,26 @@ export default () => {
     style.textContent = theme
   };
 
+  const handleInputChange = (value) => {
+    setInput(value)
+    localStorage.setItem("inputCode", value);
+  }
+
   const handleThemeToggle = () => {
     const nextDarkMode = !darkMode()
     setDarkMode(nextDarkMode)
-    saveLocalStorage("darkMode", nextDarkMode)
+    saveBoolLocalStorage("darkMode", nextDarkMode)
     changeEditorTheme(nextDarkMode)
     setAnchorEl(null)
   }
 
   const handleWordWrapToggle = () => {
     setWordWrap(!wordWrap())
-    saveLocalStorage("wordWrap", wordWrap())
+    saveBoolLocalStorage("wordWrap", wordWrap())
     setAnchorEl(null)
   }
 
-  const handleInput = () => {
+  const handleRunCode = () => {
     const valuePtr = stamon.stringToNewUTF8(input());
 
     const virtualTextarea = document.createElement("textarea");
@@ -265,7 +275,7 @@ export default () => {
                 Stamon Playground
               </Show>
             </Typography>
-            <Button color="inherit" variant="outlined" onClick={handleInput}>Run</Button>
+            <Button color="inherit" variant="outlined" onClick={handleRunCode}>Run</Button>
             <IconButton
               aria-controls={openMenu() ? "function-menu" : undefined}
               aria-expanded={openMenu() ? "true" : undefined}
@@ -334,8 +344,8 @@ export default () => {
               language="stamon"
               tabSize={4}
               extensions={basicSetup}
-              onUpdate={setInput}
-              value={exampleCode}
+              onUpdate={handleInputChange}
+              value={getInitialCode()}
               wordWrap={wordWrap()}
               style={{ height: '100%' }}
             />
