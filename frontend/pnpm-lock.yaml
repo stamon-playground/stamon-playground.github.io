@@ -42,6 +42,9 @@ importers:
       vite-plugin-solid:
         specifier: ^2.10.2
         version: 2.10.2(solid-js@1.8.19)(vite@5.3.5(terser@5.31.4))
+      workbox-window:
+        specifier: ^7.1.0
+        version: 7.1.0
 
 packages:
 
