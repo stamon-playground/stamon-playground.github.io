@@ -1,9 +1,6 @@
 {
   "name": "stamon-playground",
-  "shortname": "Stamon",
-  "fullname": "Stamon Playground",
   "version": "0.0.0",
-  "description": "Run stamon in a one-click playground",
   "type": "module",
   "scripts": {
     "start": "vite",

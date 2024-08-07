@@ -1,6 +1,9 @@
 /* @refresh reload */
 import { render } from 'solid-js/web';
 import App from './App';
+import { registerSW } from 'virtual:pwa-register'
+
+registerSW({ immediate: true })
 
 const root = document.getElementById('root');
 

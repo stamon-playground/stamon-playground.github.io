@@ -3,7 +3,6 @@ import solidPlugin from 'vite-plugin-solid'
 import suidPlugin from "@suid/vite-plugin"
 import { ViteMinifyPlugin } from 'vite-plugin-minify'
 import { VitePWA } from 'vite-plugin-pwa'
-import packageInfo from './package.json'
 
 export default defineConfig({
   plugins: [
@@ -15,9 +14,10 @@ export default defineConfig({
       injectRegister: 'inline',
       filename: 'serviceWorker.js',
       manifest: {
-        name: packageInfo.fullname,
-        short_name: packageInfo.shortname,
-        description: packageInfo.description,
+        name: "Stamon Playground",
+        short_name: "Stamon",
+        description:"Run stamon in a one-click playground",
+        lang: 'zh-CN',
         theme_color: '#ffffff',
         icons: [{
           src: 'logo.svg',
