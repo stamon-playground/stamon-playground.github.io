@@ -197,19 +197,19 @@ export default () => {
     setAnchorEl(null)
   }
 
-  const worker = new StamonWorker();
+  const worker = new StamonWorker()
 
-  worker.onmessage = function (e) {
+  worker.onmessage = (e) => {
     const data = e.data;
     if (data.type === 'print') {
-      setOutput(output() + data.message);
+      setOutput(output() + data.message)
     }
   }
 
   const handleRunCode = async () => {
-    setOutput("");
-    worker.postMessage({ type: 'run', input: input() });
-  };
+    setOutput("")
+    worker.postMessage({ type: 'run', input: input() })
+  }
 
   const EditorWrapper = (props) => (
     <Box
