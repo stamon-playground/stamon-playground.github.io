@@ -11,11 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -37,9 +32,26 @@ jobs:
       run: pnpm build
       working-directory: ./frontend
 
-    - name: Deploy frontend
+    - name: Commit frontend
       uses: peaceiris/actions-gh-pages@v4
       with:
         publish_dir: ./frontend/dist
         github_token: ${{ secrets.GITHUB_TOKEN }}
         commit_message: Github CI
+
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
