@@ -134,7 +134,7 @@ languageMap.stamon = {
 
 const exampleCode = `// Stamon example
 import std;
-print("Hello world!");
+println("Hello world!");
 `
 
 const getInitialCode = () => {
@@ -202,7 +202,7 @@ export default () => {
   worker.onmessage = (e) => {
     const data = e.data;
     if (data.type === 'print') {
-      setOutput(output() + data.message)
+      setOutput(output() + data.output)
     }
   }
 
@@ -222,13 +222,13 @@ export default () => {
       }}
       {...props}
     />
-  );
+  )
 
-  const [leftFr, setLeftFr] = createSignal(1);
-  const [rightFr, setRightFr] = createSignal(1);
-  const [isVertical, setIsVertical] = createSignal(isSmallScreen());
+  const [leftFr, setLeftFr] = createSignal(1)
+  const [rightFr, setRightFr] = createSignal(1)
+  const [isVertical, setIsVertical] = createSignal(isSmallScreen())
 
-  let containerRef;
+  let containerRef
 
   const dragBind = useDrag(({ down, delta: [mx, my] }) => {
     const { width, height } = {
