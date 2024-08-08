@@ -308,6 +308,12 @@ String getNoEndingSeparatorPath(String path) {
 	return path;
 }
 
+void close_binary_buffer() {
+	free(binary_buffer);
+	binary_buffer_len = 0;
+	allocated_buffer_len = 0;
+}
+
 EM_PORT_API(int) RunStamon(char* code) {
 
 	init_stamon_std_lib_code();
@@ -332,14 +338,11 @@ EM_PORT_API(int) RunStamon(char* code) {
     };
 
 	if(StamonMain(3, argv2)!=0) {
+		close_binary_buffer();
 		return -1;
 	}
 
-	free(binary_buffer);
-	binary_buffer_len = 0;
-	allocated_buffer_len = 0;
-
-	fflush(stdout);
+	close_binary_buffer();
 
 	return 0;
 }

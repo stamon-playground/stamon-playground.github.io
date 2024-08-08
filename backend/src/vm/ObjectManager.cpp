@@ -165,6 +165,12 @@ namespace stamon::vm {
 					return NULL;
 				}
 
+				if(result==NULL) {
+					//如果物理内存不足，就报错
+					THROW("out of physical memory")
+					return NULL;
+				}
+
 				/*
 				 * 注意：一定要在GC后才能添加到列表，否则刚申请的对象可能会被GC掉
 				*/
@@ -236,7 +242,17 @@ namespace stamon::vm {
 				//垃圾回收函数，是整个项目最难的部分之一
 				//采用标准的标记清除算法
 
-				//先把非垃圾对象标记
+				//标记非垃圾对象
+
+				//先把操作数标记为非垃圾对象
+				ArrayList<datatype::DataType*> opnd_unscanned = OPND.clone();
+				for(int i=0,len=OPND.size(); i<len; i++) {
+					OPND[i]->gc_flag = true;
+				}
+				MarkScopeObject(opnd_unscanned);
+				opnd_unscanned.clear();
+
+				//再根据GC Root标记非垃圾对象
 				for(int i=0; i<Scopes.size(); i++) {
 					//遍历作用域
 					ObjectScope scope = Scopes.at(i);
@@ -245,12 +261,10 @@ namespace stamon::vm {
 					//未扫描的对象列表
 					InitUnscannedScope(scope, unscanned);
 					//把作用域里的变量（也就是GCRoots）加载到unscanned里
-					MarkScopeObject(scope, unscanned);
+					MarkScopeObject(unscanned);
 					//遍历该作用域的变量涉及到的全部对象，并且标记他们
-				}
-
-				for(int i=0,len=OPND.size(); i<len; i++) {
-					OPND[i]->gc_flag = true;
+					unscanned.clear();
+					//清空未扫描列表
 				}
 
 				//清除垃圾对象
@@ -269,10 +283,7 @@ namespace stamon::vm {
 				return;
 			}
 
-			void MarkScopeObject(
-			    ObjectScope& scope,
-			    ArrayList<datatype::DataType*>& unscanned
-			) {
+			void MarkScopeObject(ArrayList<datatype::DataType*>& unscanned) {
 				//遍历该作用域的变量涉及到的全部对象，并且标记他们
 				while(unscanned.empty()==false) {
 					int len = unscanned.size();
@@ -356,18 +367,22 @@ namespace stamon::vm {
 			}
 
 			void CleanScopeTrash() {
-				int i = 0;
-				while(i<Objects.size()) {
+				ArrayList<datatype::DataType*> NewObjects;
+				//把清理后有用的对象存储在这个列表里
+
+				for(int i=0,len=Objects.size();i<len;i++) {
 					if(Objects.at(i)->gc_flag==false) {
 						//垃圾对象
 						FreeObject(Objects.at(i));	//释放对象
-						Objects.erase(i);	//从列表中删除
 					} else {
 						//非垃圾对象
 						Objects.at(i)->gc_flag = false;	//把gc_flag设为false
-						i++;
+						NewObjects.add(Objects.at(i));
 					}
 				}
+
+				Objects = NewObjects;
+				//更新对象列表
 			}
 
 			void FreeObject(datatype::DataType* o) {

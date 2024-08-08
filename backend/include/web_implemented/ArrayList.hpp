@@ -40,7 +40,7 @@ class ArrayList {
 		/*值得注意的是：正常的ArrayList赋值，实际上是引用传递*/
 
 		ArrayList() {
-			list = NULL;
+			list = new T[0];
 			length = 0;
 			cache_length = 0;
 		} // 创建一个空列表

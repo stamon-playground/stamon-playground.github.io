@@ -21,7 +21,7 @@
 
 #define CDT(dt, type) \
 	if(dt->getType()!=type##ID) {\
-		ThrowTypeError(type##ID);\
+		ThrowTypeError(dt->getType());\
 	}\
 	CE
 

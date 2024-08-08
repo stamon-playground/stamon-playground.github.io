@@ -238,11 +238,11 @@ class String {
 		}
 
 		bool operator<=(const String& s) const {
-			return !(*this > str);
+			return !(*this > s);
 		}
 
 		bool operator>=(const String& s) const {
-			return !(*this < str);
+			return !(*this < s);
 		}
 
 		char_type& operator[](size_type index) {
