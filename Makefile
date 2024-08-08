@@ -41,7 +41,7 @@ debug_html:
 	"-sEXPORTED_RUNTIME_METHODS=['stringToNewUTF8']" \
 	"-sEXPORTED_FUNCTIONS=['_malloc', '_free']" \
 	-lm
-	node bin/Stamon.js
+	node bin/Stamon.js 
 
 website:
 
