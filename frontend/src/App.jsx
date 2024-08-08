@@ -159,6 +159,7 @@ const saveBoolLocalStorage = (key, value) => {
 export default () => {
   const [input, setInput] = createSignal("");
   const [output, setOutput] = createSignal("");
+  const [running, setRunning] = createSignal(false);
   const [titleClickTimes, setTitleClickTimes] = createSignal(0);
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
@@ -208,10 +209,14 @@ export default () => {
     if (data.type === 'print') {
       setOutput(output() + data.output)
     }
+    if (data.type === 'finish') {
+      setRunning(false)
+    }
   }
 
   const handleRunCode = async () => {
     setOutput("")
+    setRunning(true)
     worker.postMessage({ type: 'run', input: input() })
   }
 
@@ -277,7 +282,14 @@ export default () => {
                 Stamon Playground
               </Show>
             </Typography>
-            <Button color="inherit" variant="outlined" onClick={handleRunCode}>Run</Button>
+            <Button
+              color="inherit"
+              variant="outlined"
+              onClick={handleRunCode}
+              disabled={running()}
+            >
+              {running() ? "Running" : "Run"}
+            </Button>
             <IconButton
               aria-controls={openMenu() ? "function-menu" : undefined}
               aria-expanded={openMenu() ? "true" : undefined}

@@ -12,6 +12,8 @@ stamon().then(mod => {
 
       module._RunStamon(valuePtr)
       module._free(valuePtr)
+
+      postMessage({ type: 'finish' })
     }
   }
 })
