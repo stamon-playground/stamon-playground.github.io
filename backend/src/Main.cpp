@@ -17,8 +17,6 @@
 
 #include"Emscripten.hpp"
 
-void emscripten_run_script(const char *script);
-
 void console_log(char* msg) {
     char* s = (char*)calloc(13+strlen(msg)+4, 1);
     sprintf(s, "console.log(\"%s\");", msg);
@@ -36,7 +34,7 @@ void getHelpInformation();  //输出帮助信息
 
 String getNoEndingSeparatorPath(String path);	//获取末尾没有分隔符的路径
 
-EM_PORT_API(int) StamonMain(int argc, char* argv[]) {
+int StamonMain(int argc, char* argv[]) {
 
 	//参数表
 	ArrayList<String> args;
@@ -276,8 +274,6 @@ EM_PORT_API(int) StamonMain(int argc, char* argv[]) {
 	return 0;
 
 }
-
-
 
 void getHelpInformation() {
 	platform_puts((char*)

@@ -41,7 +41,7 @@ debug_html:
 	"-sEXPORTED_RUNTIME_METHODS=['stringToNewUTF8']" \
 	"-sEXPORTED_FUNCTIONS=['_malloc', '_free']" \
 	-lm
-	node bin/Stamon.js 
+	node bin/Stamon.js
 
 website:
 
@@ -58,9 +58,8 @@ website:
 	cd backend && \
 	emcc src/Main.cpp \
 	-o ../frontend/src/stamon.js \
-	-sFORCE_FILESYSTEM -sEXIT_RUNTIME=1 \
-	-O2 -sWASM=0 \
 	-std=c++17 \
+	-Oz \
 	-I include/web_implemented \
 	-I src/ast \
 	-I src/data_type \
@@ -69,19 +68,25 @@ website:
 	-I src/compiler \
 	-I src/sfn \
 	-I src \
-	--js-library include/web_implemented/js_lib.js \
+	-s WASM=0 \
+	-s FORCE_FILESYSTEM \
+	-s EXIT_RUNTIME=1 \
+	-s EXPORT_ES6=1 \
+    -s MODULARIZE=1 \
+    -s ENVIRONMENT='web' \
+	-s USE_ES6_IMPORT_META=0 \
 	-s ALLOW_MEMORY_GROWTH=1 \
-	"-sEXPORTED_RUNTIME_METHODS=['stringToNewUTF8']" \
-	"-sEXPORTED_FUNCTIONS=['_malloc', '_free']" \
-	-lm
+	-s "EXPORTED_RUNTIME_METHODS=stringToNewUTF8" \
+	-s "EXPORTED_FUNCTIONS=_malloc,_free" \
+	--js-library include/web_implemented/js_lib.js
 
 # 修改js的Module对象为导出模式
-	cd backend && \
-	python StamonBuildSystem.py edit_js
+	# cd backend && \
+	# python StamonBuildSystem.py edit_js
 
 # -----编译前端界面-----
-	cd frontend && npm install
-	cd frontend && npm run build
+	# cd frontend && pnpm install
+	# cd frontend && pnpm build
 
 # -----将编译好的网站复制到根目录-----
-	xcopy frontend\dist . /s /e /y /i
+# 	xcopy frontend\dist . /s /e /y /i

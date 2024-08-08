@@ -24,7 +24,7 @@ import { basicSetup } from "solid-prism-editor/setups"
 import { languages } from "solid-prism-editor/prism"
 import GithubLight from "solid-prism-editor/themes/github-light.css?inline"
 import GithubDark from "solid-prism-editor/themes/github-dark.css?inline"
-import stamon from "./stamon"
+import StamonWorker from "./worker.js?worker"
 
 import "solid-prism-editor/layout.css"
 import "solid-prism-editor/search.css"
@@ -197,20 +197,18 @@ export default () => {
     setAnchorEl(null)
   }
 
-  const handleRunCode = () => {
-    const valuePtr = stamon.stringToNewUTF8(input());
+  const worker = new StamonWorker();
 
-    const virtualTextarea = document.createElement("textarea");
-    virtualTextarea.id = "result";
-    virtualTextarea.style.display = "none";
-    document.body.appendChild(virtualTextarea);
+  worker.onmessage = function (e) {
+    const data = e.data;
+    if (data.type === 'print') {
+      setOutput(output() + data.message);
+    }
+  }
 
-    stamon._RunStamon(valuePtr);
-    stamon._free(valuePtr);
-
-    setOutput(virtualTextarea.value);
-
-    document.body.removeChild(virtualTextarea);
+  const handleRunCode = async () => {
+    setOutput("");
+    worker.postMessage({ type: 'run', input: input() });
   };
 
   const EditorWrapper = (props) => (

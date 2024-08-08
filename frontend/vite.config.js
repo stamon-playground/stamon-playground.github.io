@@ -30,7 +30,6 @@ export default defineConfig({
   ],
   build: {
     minify: 'terser',
-    target: 'esnext',
     reportCompressedSize: false,
     terserOptions: {
       compress: {
@@ -42,11 +41,7 @@ export default defineConfig({
       output: {
         chunkFileNames: 'js/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
-        assetFileNames: '[ext]/[name]-[hash].[ext]',
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) return 'vendor'
-          if (id.includes('stamon.js')) return 'stamon'
-        }
+        assetFileNames: '[ext]/[name]-[hash].[ext]'
       }
     }
   }
