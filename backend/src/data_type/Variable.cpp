@@ -12,11 +12,6 @@
 #include"DataType.hpp"
 
 namespace stamon::datatype {
-
-	class Variable;
-
-	ArrayList<Variable*> variable_mem_pool;
-
 	class Variable {
 		public:
 			DataType* data;

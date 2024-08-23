@@ -155,10 +155,12 @@ int StamonMain(int argc, char* argv[]) {
 		String src;
 		bool isGC = true;
 
-		int MemLimit = 16*1024*1024;    //默认虚拟机运行内存16m
+		int MemLimit = 128*1024*1024;    //默认虚拟机运行内存16m
+
+		int PoolCacheSize = MemLimit;	//默认内存池缓存大小与运行内存限制一致
 
 		if(args.size()<2) {
-			platform_puts((char*)"stamon: run: too few arguments\n"
+			printf("stamon: run: too few arguments\n"
 			       "please enter \'stamon help\' "
 			       "to get more information.\n");
 		} else {
@@ -178,8 +180,17 @@ int StamonMain(int argc, char* argv[]) {
 					MemLimit = args[i]
 					           .substring(11, args[i].length())
 					           .toInt();
+				}else if(
+				    args[i].length()>15
+				    &&args[i].substring(0, 15).equals(
+				        String((char*)"--MemPoolCache=")
+				    )
+				) {
+					PoolCacheSize = args[i]
+									.substring(15, args[i].length())
+									.toInt();
 				} else {
-					platform_puts((char*)
+					printf(
 					    "stamon: run: bad command\n"
 					    "please enter \'stamon help\' "
 					    "to get more information.\n"
@@ -193,7 +204,7 @@ int StamonMain(int argc, char* argv[]) {
 
 		stamon.Init();
 
-		stamon.run(src, isGC, MemLimit);
+		stamon.run(src, isGC, MemLimit, PoolCacheSize);
 
 		if(stamon.ErrorMsg->empty()==false) {
 			platform_puts((char*)"stamon: run: fatal error:\n");
