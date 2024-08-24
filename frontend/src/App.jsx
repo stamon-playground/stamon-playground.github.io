@@ -135,8 +135,7 @@ languageMap.stamon = {
 const exampleCode = `// Stamon example
 import std;
 
-println("Hello world!");
-`
+println("Hello world!");`
 
 const getInitialCode = () => {
   const code = localStorage.getItem("inputCode");
