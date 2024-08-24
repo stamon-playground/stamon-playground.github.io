@@ -135,10 +135,7 @@ languageMap.stamon = {
 const exampleCode = `// Stamon example
 import std;
 
-for i in range(20) {
-    println("Hello world!");
-    for i in range(5000) {}
-}
+println("Hello world!");
 `
 
 const getInitialCode = () => {
