@@ -30,10 +30,6 @@ import "solid-prism-editor/layout.css"
 import "solid-prism-editor/search.css"
 
 languages["stamon"] = {
-  'comment': {
-    pattern: /\/\/.*/,
-    greedy: true
-  },
   'string': {
     pattern: /"(?:\\.|[^\\"])*"/,
     greedy: true,
@@ -43,6 +39,10 @@ languages["stamon"] = {
         alias: 'constant'
       }
     }
+  },
+  'comment': {
+    pattern: /\/\/.*/,
+    greedy: true
   },
   'keyword': [
     {
@@ -119,9 +119,6 @@ languages["stamon"] = {
 }
 
 languageMap.stamon = {
-  comments: {
-    line: "//",
-  },
   autoIndent: [
     ([start], value) => /[([{][^\n)\]}]*$/.test(value.slice(0, start)),
     ([start, end], value) => /\[]|\(\)|{}/.test(value[start - 1] + value[end])
