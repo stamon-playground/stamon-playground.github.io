@@ -105,7 +105,7 @@
 //利用t1、t2拷贝了一份left和right，使其原值不受影响
 
 #define DIV_ERRCHECK \
-	if(r->getType()==0) {\
+	if(r->getVal()==0) {\
 		ThrowDivZeroError();\
 	}
 //用于ASMD_OPERATE中的ErrCheck
@@ -294,6 +294,7 @@ namespace stamon::vm {
 			void ThrowReturnError();
 			void ThrowUnknownOperatorError();
 			void ThrowUnknownMemberError(int id);
+			void ThrowLengthError();
 
 			RetStatus excute(
 			    ast::AstNode* main_node, bool isGC, int vm_mem_limit,
@@ -858,6 +859,7 @@ namespace stamon::vm {
 				CHECK_ASS(Sub, -,)
 				CHECK_ASS(Mul, *,)
 				CHECK_ASS(Div, /, DIV_ERRCHECK)
+				CE
 				CHECK_INT_ASS(Mod, %)
 				CHECK_INT_ASS(And, &)
 				CHECK_INT_ASS(XOr, ^)
@@ -1321,6 +1323,12 @@ namespace stamon::vm {
 				datatype::DataType* length = st.retval->data;
 				CDT(length, datatype::IntegerType)
 
+				if(((datatype::IntegerType*)length)->getVal()<0) {
+					//错误的数列长度
+					ThrowLengthError();
+					CE;
+				}
+
 				OPND_PUSH(length)
 
 				Variable* rst_var = new Variable(
@@ -1588,6 +1596,14 @@ inline void stamon::vm::AstRunner::ThrowUnknownMemberError(int id) {
 		+ String((char*)"object has no member \'")
 	    + iden
 	    + String((char*)"\'")
+	)
+}
+
+inline void stamon::vm::AstRunner::ThrowLengthError() {
+	THROW_S(
+		String((char*)"Length Error: ")
+		+ getExcutePosition()
+		+ String((char*)"the length must be non-negative")
 	)
 }
 

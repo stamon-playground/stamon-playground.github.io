@@ -34,6 +34,13 @@ void getHelpInformation();  //输出帮助信息
 
 String getNoEndingSeparatorPath(String path);	//获取末尾没有分隔符的路径
 
+enum STAMON_WARNING_SAFE_LEVEL {
+	// 警告等级
+	StamonWarningSafeLevel_IgnoreWarning = 0,
+	StamonWarningSafeLevel_JustWarn,
+	StamonWarningSafeLevel_FatalWarning
+};
+
 int StamonMain(int argc, char* argv[]) {
 
 	//参数表
@@ -42,7 +49,7 @@ int StamonMain(int argc, char* argv[]) {
 	//获取可执行文件路径
 	String s(argv[0]);
 
-	String program_path((char*)"./");
+	int warning_level = StamonWarningSafeLevel_JustWarn;	//默认只警告
 
 	for(int i=1; i<argc; i++) {
 		args.add(String(argv[i]));
@@ -50,7 +57,7 @@ int StamonMain(int argc, char* argv[]) {
 
 	if(args.empty()) {
 		//没有传入任何参数
-		platform_puts((char*)
+		platform_puts (
 		    "stamon: fatal error: too few arguments\n"
 		    "please enter \'stamon help\' to get more information.\n"
 		);
@@ -94,7 +101,19 @@ int StamonMain(int argc, char* argv[]) {
 					} else if(args[i].equals(String((char*)"--strip=true"))) {
 
 						isStrip = true;
+					
+					} else if(args[i].equals(String((char*)"--IgnoreWarning"))) {
 
+						warning_level = StamonWarningSafeLevel_IgnoreWarning;
+					
+					} else if(args[i].equals(String((char*)"--JustWarn"))) {
+
+						warning_level = StamonWarningSafeLevel_JustWarn;
+					
+					} else if(args[i].equals(String((char*)"--FatalWarning"))) {
+
+						warning_level = StamonWarningSafeLevel_FatalWarning;
+					
 					} else if(
 					    args[i].length()>3
 					    &&args[i].substring(0, 2).equals((char*)"-I")) {
@@ -109,7 +128,7 @@ int StamonMain(int argc, char* argv[]) {
 					} else {
 
 						//错误参数
-						platform_puts((char*)
+						printf(
 						    "stamon: compile: bad command\n"
 						    "please enter \'stamon help\' "
 						    "to get more information.\n"
@@ -117,7 +136,6 @@ int StamonMain(int argc, char* argv[]) {
 
 						return -1;
 					}
-
 				}
 			}
 		}
@@ -137,10 +155,26 @@ int StamonMain(int argc, char* argv[]) {
 
 		stamon.compile(src, dst, isSupportImport, isStrip);
 
+		if(
+			stamon.WarningMsg->empty()==false
+			&& warning_level != StamonWarningSafeLevel_IgnoreWarning
+		) {
+			if(warning_level==StamonWarningSafeLevel_JustWarn) {
+				platform_puts("stamon: compile: warning:\n");
+			} else if(warning_level==StamonWarningSafeLevel_FatalWarning) {
+				platform_puts("stamon: compile: fatal error:\n");
+			}
+
+			for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
+				platform_puts("%s\n", stamon.WarningMsg->at(i).getstr());
+			}
+			return -1;
+		}
+
 		if(stamon.ErrorMsg->empty()==false) {
-			platform_puts((char*)"stamon: compile: fatal error:\n");
+			platform_puts("stamon: compile: fatal error:\n");
 			for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-				platform_puts((char*)stamon.ErrorMsg->at(i).getstr());
+				platform_puts("%s\n", stamon.ErrorMsg->at(i).getstr());
 			}
 			return -1;
 		}
@@ -155,12 +189,12 @@ int StamonMain(int argc, char* argv[]) {
 		String src;
 		bool isGC = true;
 
-		int MemLimit = 128*1024*1024;    //默认虚拟机运行内存16m
+		int MemLimit = 128*1024*1024;    //默认浏览器内存限制128mb
 
 		int PoolCacheSize = MemLimit;	//默认内存池缓存大小与运行内存限制一致
 
 		if(args.size()<2) {
-			printf("stamon: run: too few arguments\n"
+			platform_puts("stamon: run: too few arguments\n"
 			       "please enter \'stamon help\' "
 			       "to get more information.\n");
 		} else {
@@ -180,7 +214,7 @@ int StamonMain(int argc, char* argv[]) {
 					MemLimit = args[i]
 					           .substring(11, args[i].length())
 					           .toInt();
-				}else if(
+				} else if(
 				    args[i].length()>15
 				    &&args[i].substring(0, 15).equals(
 				        String((char*)"--MemPoolCache=")
@@ -189,8 +223,20 @@ int StamonMain(int argc, char* argv[]) {
 					PoolCacheSize = args[i]
 									.substring(15, args[i].length())
 									.toInt();
+				} else if(args[i].equals(String((char*)"--IgnoreWarning"))) {
+
+					warning_level = StamonWarningSafeLevel_IgnoreWarning;
+				
+				} else if(args[i].equals(String((char*)"--JustWarn"))) {
+
+					warning_level = StamonWarningSafeLevel_JustWarn;
+				
+				} else if(args[i].equals(String((char*)"--FatalWarning"))) {
+
+					warning_level = StamonWarningSafeLevel_FatalWarning;
+				
 				} else {
-					printf(
+					platform_puts(
 					    "stamon: run: bad command\n"
 					    "please enter \'stamon help\' "
 					    "to get more information.\n"
@@ -206,10 +252,25 @@ int StamonMain(int argc, char* argv[]) {
 
 		stamon.run(src, isGC, MemLimit, PoolCacheSize);
 
+		if(
+			stamon.WarningMsg->empty()==false
+			&& warning_level != StamonWarningSafeLevel_IgnoreWarning
+		) {
+			if(warning_level==StamonWarningSafeLevel_JustWarn) {
+				platform_puts("stamon: run: warning:\n");
+			} else if(warning_level==StamonWarningSafeLevel_FatalWarning) {
+				platform_puts("stamon: run: fatal error:\n");
+			}
+			for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
+				platform_puts("%s\n", stamon.WarningMsg->at(i).getstr());
+			}
+			return -1;
+		}
+
 		if(stamon.ErrorMsg->empty()==false) {
-			platform_puts((char*)"stamon: run: fatal error:\n");
+			platform_puts("stamon: run: fatal error:\n");
 			for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-				platform_puts((char*)stamon.ErrorMsg->at(i).getstr());
+				platform_puts("%s\n", stamon.ErrorMsg->at(i).getstr());
 			}
 			return -1;
 		}
