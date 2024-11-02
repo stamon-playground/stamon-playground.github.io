@@ -154,7 +154,7 @@ void sfn_puts(SFN_PARA_LIST) {
 	if(val->getType()!=stamon::datatype::StringTypeID) {
 		THROW("bad type in puts")
 	}
-	platform_printf("%s", ((stamon::datatype::StringType*)(arg->data))->getVal().getstr());
+	platform_puts(((stamon::datatype::StringType*)(arg->data))->getVal().getstr());
 	return;
 }
 
@@ -163,11 +163,11 @@ void sfn_printNum(SFN_PARA_LIST) {
 	stamon::datatype::DataType* val = arg->data;
 
 	if(val->getType()==stamon::datatype::IntegerTypeID) {
-		platform_printf("%d", ((stamon::datatype::IntegerType*)val)->getVal());
+		platform_puts("%d", ((stamon::datatype::IntegerType*)val)->getVal());
 	} else if(val->getType()==stamon::datatype::FloatTypeID) {
-		platform_printf("%f", ((stamon::datatype::FloatType*)val)->getVal());
+		platform_puts("%f", ((stamon::datatype::FloatType*)val)->getVal());
 	} else if(val->getType()==stamon::datatype::DoubleTypeID) {
-		platform_printf("%lf", ((stamon::datatype::DoubleType*)val)->getVal());
+		platform_puts("%lf", ((stamon::datatype::DoubleType*)val)->getVal());
 	} else {
 		THROW("bad type in printNum")
 	}
