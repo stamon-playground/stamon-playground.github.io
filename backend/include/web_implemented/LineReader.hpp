@@ -40,7 +40,6 @@ class LineReader {
 
 			if(filename!="demo.st") {
 				if(stamon_std_lib_code.containsKey(filename)==false) {
-					LOG("??");
 					FILE_ERR;
 				}
 				text = stamon_std_lib_code.get(filename);

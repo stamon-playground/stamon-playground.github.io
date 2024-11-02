@@ -47,7 +47,7 @@ String toString(T&& t){
 	} \
 	while (0)
 
-EM_PORT_API(void) js_print(char* s);
+EM_PORT_API(void) js_print(const char* s);
 
 #define platform_exit exit
 #define platform_system system

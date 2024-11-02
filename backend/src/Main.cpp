@@ -143,7 +143,7 @@ int StamonMain(int argc, char* argv[]) {
 		if(isSupportImport) {
 			ImportPaths.insert(
 			    0,
-			    getNoEndingSeparatorPath(program_path)
+			    getNoEndingSeparatorPath(".")
 			    + String((char*)"/include/")
 			);
 			//加入标准库路径
@@ -166,7 +166,7 @@ int StamonMain(int argc, char* argv[]) {
 			}
 
 			for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-				platform_puts("%s\n", stamon.WarningMsg->at(i).getstr());
+				platform_puts((stamon.WarningMsg->at(i)+String("\n")).getstr());
 			}
 			return -1;
 		}
@@ -174,7 +174,7 @@ int StamonMain(int argc, char* argv[]) {
 		if(stamon.ErrorMsg->empty()==false) {
 			platform_puts("stamon: compile: fatal error:\n");
 			for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-				platform_puts("%s\n", stamon.ErrorMsg->at(i).getstr());
+				platform_puts((stamon.ErrorMsg->at(i)+String("\n")).getstr());
 			}
 			return -1;
 		}
@@ -262,7 +262,7 @@ int StamonMain(int argc, char* argv[]) {
 				platform_puts("stamon: run: fatal error:\n");
 			}
 			for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-				platform_puts("%s\n", stamon.WarningMsg->at(i).getstr());
+				platform_puts((stamon.WarningMsg->at(i)+String("\n")).getstr());
 			}
 			return -1;
 		}
@@ -270,7 +270,7 @@ int StamonMain(int argc, char* argv[]) {
 		if(stamon.ErrorMsg->empty()==false) {
 			platform_puts("stamon: run: fatal error:\n");
 			for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-				platform_puts("%s\n", stamon.ErrorMsg->at(i).getstr());
+				platform_puts((stamon.ErrorMsg->at(i)+String("\n")).getstr());
 			}
 			return -1;
 		}
