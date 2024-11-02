@@ -163,11 +163,11 @@ void sfn_printNum(SFN_PARA_LIST) {
 	stamon::datatype::DataType* val = arg->data;
 
 	if(val->getType()==stamon::datatype::IntegerTypeID) {
-		platform_puts("%d", ((stamon::datatype::IntegerType*)val)->getVal());
+		platform_puts(toString(((stamon::datatype::IntegerType*)val)->getVal()).getstr());
 	} else if(val->getType()==stamon::datatype::FloatTypeID) {
-		platform_puts("%f", ((stamon::datatype::FloatType*)val)->getVal());
+		platform_puts(toString(((stamon::datatype::FloatType*)val)->getVal()).getstr());
 	} else if(val->getType()==stamon::datatype::DoubleTypeID) {
-		platform_puts("%lf", ((stamon::datatype::DoubleType*)val)->getVal());
+		platform_puts(toString(((stamon::datatype::DoubleType*)val)->getVal()).getstr());
 	} else {
 		THROW("bad type in printNum")
 	}
