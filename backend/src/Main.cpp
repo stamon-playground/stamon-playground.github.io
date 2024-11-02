@@ -168,7 +168,10 @@ int StamonMain(int argc, char* argv[]) {
 			for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
 				platform_puts((stamon.WarningMsg->at(i)+String("\n")).getstr());
 			}
-			return -1;
+
+			if(warning_level==StamonWarningSafeLevel_FatalWarning) {
+				return -1;
+			}
 		}
 
 		if(stamon.ErrorMsg->empty()==false) {
@@ -264,7 +267,9 @@ int StamonMain(int argc, char* argv[]) {
 			for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
 				platform_puts((stamon.WarningMsg->at(i)+String("\n")).getstr());
 			}
-			return -1;
+			if(warning_level==StamonWarningSafeLevel_FatalWarning) {
+				return -1;
+			}
 		}
 
 		if(stamon.ErrorMsg->empty()==false) {
