@@ -258,7 +258,6 @@ namespace stamon::c {   //编译器命名空间
 					rst += s[i] - '0';
 					if(rst<0) {
 						WARN("the integer is too large");
-						return -1;
 					}
 				}
 				return rst;
@@ -276,7 +275,6 @@ namespace stamon::c {   //编译器命名空间
 					integer += s[i] - '0';
 					if(integer<0) {
 						WARN("the floating point is too large");
-						return -1.0;
 					}
 					i++;
 				}
@@ -289,7 +287,6 @@ namespace stamon::c {   //编译器命名空间
 					decimal += (double)(s[i]-'0');
 					if(decimal<0) {
 						WARN("the floating point is too large");
-						return -1.0;
 					}
 					i++;
 				}
