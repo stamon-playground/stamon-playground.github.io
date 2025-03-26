@@ -66,7 +66,11 @@ website:
 	-I src/vm \
 	-I src/ir \
 	-I src/compiler \
-	-I src/sfn \
+	-I src/sfn  \
+	-I src/tac \
+	-I src/action \
+	-I src/error \
+	-I src/config \
 	-I src \
 	-s WASM=0 \
 	-s FORCE_FILESYSTEM \
@@ -81,12 +85,12 @@ website:
 	--js-library include/web_implemented/js_lib.js
 
 # 修改js的Module对象为导出模式
-	# cd backend && \
-	# python StamonBuildSystem.py edit_js
+#	cd backend && \
+#	python StamonBuildSystem.py edit_js
 
 # -----编译前端界面-----
-	# cd frontend && pnpm install
-	# cd frontend && pnpm build
+#	cd frontend && pnpm install
+#	cd frontend && pnpm build
 
 # -----将编译好的网站复制到根目录-----
 # 	xcopy frontend\dist . /s /e /y /i

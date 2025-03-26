@@ -14,6 +14,7 @@
 #include"FileMap.hpp"
 
 #include"Lexer.cpp"
+#include"CompilerExceptionMessage.cpp"
 
 #define check(type) (matcher.Check(type))
 #define _pop			(matcher.Pop())
@@ -89,7 +90,7 @@ namespace stamon::c {
 				if(Check(type)) {
 					return lexer.getTok();
 				} else {
-					THROW("invalid syntax")
+					THROW_S(err::InvalidSyntax());
 					return NULL;
 				}
 			}
@@ -151,10 +152,10 @@ namespace stamon::c {
 			void mark(Token* iden) {	//声明一个变量
 				if(scope.containsKey(((IdenToken*)iden)->iden)) {
 					THROW_S(
-					    String((char*)"variable \"")
-					    +((IdenToken*)iden)->iden
-					    + String((char*)"\" are declared repeatedly")
-					)
+						err::VariableDeclaredRepeatedly(
+									((IdenToken*)iden)->iden
+							 )
+					);
 					return;
 				}
 				scope.put(((IdenToken*)iden)->iden, NULL);
@@ -164,10 +165,6 @@ namespace stamon::c {
 				//无论该标识符是否被定义过，强制定义一遍
 				//该函数用于弱定义
 				scope.put(((IdenToken*)iden)->iden, NULL);
-			}
-
-			void destroy() {
-				scope.destroy();
 			}
 	};
 
@@ -215,8 +212,6 @@ namespace stamon::c {
 
 			ArrayList<SyntaxScope> scopes;
 
-
-
 		public:
 
 			int ParsingLineNo = 1;	//当前正在分析的行号
@@ -227,6 +222,15 @@ namespace stamon::c {
 			FileMap filemap;
 			ArrayList<SourceSyntax>* src_project;
 			ArrayList<String>* ErrorMsg;
+
+			ArrayList<int> loop_levels;
+			/*
+			 * 通过维护该变量，我们可以判断break和continue是否处于循环当中
+			 * 在全局初始化时，loop_levels默认只有一个值为0的元素
+			 * 每进入一个新的函数，loop_levels加入一个值为0的元素，退出时弹出这个元素
+			 * 每嵌套一个新的循环，loop_levels的结尾元素自增1，退出时结尾元素自减1
+			 * 不难发现，如果loop_levels的结尾元素大于0，则当前处于循环当中
+			 */
 
 			Parser(Matcher matcher, STMException* e) {
 				this->matcher = matcher;
@@ -252,6 +256,7 @@ namespace stamon::c {
 				filemap = map;
 				src_project = src;
 				ErrorMsg = msg;
+				loop_levels.add(0);
 			}
 
 			template<class T, typename...Types>
@@ -305,7 +310,7 @@ namespace stamon::c {
 				ast::AstIdentifierName *port, *arg;
 
 				if(!check(TokenIden)) {
-					THROW("the port of the SFN statement must be an identifier");
+					THROW_S(err::WrongSfnSyntax());
 					CE;
 				}
 				port = IDEN();
@@ -314,7 +319,7 @@ namespace stamon::c {
 				match(TokenCmm);
 
 				if(!check(TokenIden)) {
-					THROW("the port of the SFN statement must be an identifier");
+					THROW_S(err::WrongSfnSyntax());
 					CE;
 				}
 
@@ -361,48 +366,80 @@ namespace stamon::c {
 				//读取一条语句，并将解析后的ast加入stm当中
 				//这里的返回值类型为void*，纯粹为了方便CE时return NULL;
 				if(check(TokenDef)) {
+
 					def_var(stm);
+
 				} else if(check(TokenFunc)
 				          &&matcher.Peek(1)->type==TokenIden) {
+
 					//定义函数
 					stm->add(def_func());
+
 				} else if(check(TokenClass)
 				          ||matcher.Peek(1)->type==TokenClass) {
+
 					stm->add(def_class());
+
 				} else if(check(TokenIf)) {
+
 					stm->add(statement_if());
+
 				} else if(check(TokenWhile)) {
+
 					stm->add(statement_while());
 					CE
+
 				} else if(check(TokenFor)) {
+
 					stm->add(statement_for());
+
 				}  else if(check(TokenReturn)) {
+					
 					stm->add(statement_return());
+
 				} else if(check(TokenContinue)) {
+
+					if(loop_levels[loop_levels.size()-1]==0) {
+						THROW_S(err::ContinueOutsideLoop());
+						return NULL;
+					}
 					stm->add(
 					    Ast<ast::AstContinue>(
 					        _pop->lineNo
 					    )
 					);
 					match(TokenSemi);
+
 				} else if(check(TokenBreak)) {
+
+					if(loop_levels[loop_levels.size()-1]==0) {
+						THROW_S(err::BreakOutsideLoop());
+						return NULL;
+					}
 					stm->add(
 					    Ast<ast::AstBreak>(
 					        _pop->lineNo
 					    )
 					);
 					match(TokenSemi);
+
 				} else if(check(TokenSemi)) {	//空语句
 					_pop;	//弹出分号
 				} else if(check(TokenSFN)) {
+
 					stm->add(sfn());
+
 				} else if(check(TokenImport)) {
+
 					statement_import();
+
 				} else {
+
 					//如果以上情况都不是，那就只有可能是表达式了
 					stm->add(expression());
 					CE
 					match(TokenSemi);
+
 				}
 				CE
 
@@ -440,7 +477,7 @@ namespace stamon::c {
 
 				if(iden->type!=TokenIden) {
 					//变量名必须为标识符
-					THROW("the name of the variable must be an identifier")
+					THROW_S(err::WrongVariableFormat());
 					return NULL;
 				}
 
@@ -512,6 +549,8 @@ namespace stamon::c {
 				//新建作用域
 				pushscope(1)
 
+				loop_levels.add(0);
+
 				ArrayList<ast::AstNode*>* args = new ArrayList<ast::AstNode*>();
 
 				if(check(TokenLBR)) {
@@ -547,7 +586,7 @@ namespace stamon::c {
 					}
 
 					if(match(TokenRBR)==NULL) {
-						THROW("the parentheses are not closed")
+						THROW_S(err::ParenthesesNotClosed());
 					}
 				}
 
@@ -555,6 +594,8 @@ namespace stamon::c {
 
 				ast::AstBlock* blk = block();
 				CE
+
+				loop_levels.erase(loop_levels.size()-1);
 
 				popscope;
 
@@ -575,6 +616,8 @@ namespace stamon::c {
 				//新建作用域
 				pushscope(1)
 
+				loop_levels.add(0);
+
 				ArrayList<ast::AstNode*>* args = new ArrayList<ast::AstNode*>();
 
 				if(check(TokenLBR)) {
@@ -610,7 +653,7 @@ namespace stamon::c {
 					}
 
 					if(match(TokenRBR)==NULL) {
-						THROW("the parentheses are not closed")
+						THROW_S(err::ParenthesesNotClosed())
 					}
 				}
 
@@ -618,6 +661,8 @@ namespace stamon::c {
 
 				ast::AstBlock* blk = block();
 				CE
+
+				loop_levels.erase(loop_levels.size()-1);
 
 				popscope;
 
@@ -668,8 +713,7 @@ namespace stamon::c {
 					          ||matcher.Peek(1)->type==TokenClass) {
 						stm->add(def_class());
 					} else {
-						THROW("only functions, classes, and variables "
-						      "can be defined in a class")
+						THROW_S(err::WrongClassDefined());
 						return NULL;
 					}
 
@@ -725,8 +769,7 @@ namespace stamon::c {
 					          ||matcher.Peek(1)->type==TokenClass) {
 						stm->add(def_class());
 					} else {
-						THROW("only functions, classes, and variables "
-						      "can be defined in a class")
+						THROW_S(err::WrongClassDefined());
 						return NULL;
 					}
 
@@ -787,8 +830,12 @@ namespace stamon::c {
 
 				pushscope(0)
 
+				loop_levels[loop_levels.size()-1]++;
+
 				ast::AstBlock* blk = block();
 				CE
+
+				loop_levels[loop_levels.size()-1]--;
 
 				popscope;
 
@@ -819,8 +866,12 @@ namespace stamon::c {
 				pushscope(0)	//新建作用域
 				scopes[scopes.size()-1].mark(iden_tok);	//登记变量
 
+				loop_levels[loop_levels.size()-1]++;
+
 				ast::AstBlock* blk = block();	//代码块
 				CE
+
+				loop_levels[loop_levels.size()-1]--;
 
 				popscope;
 
@@ -852,7 +903,7 @@ namespace stamon::c {
 				ParsingLineNo = lineNo;
 
 				if(ImportFlag==false) {
-					THROW("cannot import")
+					THROW_S(err::CannotImport());
 					return NULL;
 				}
 
@@ -997,15 +1048,13 @@ namespace stamon::c {
 				    = new ArrayList<ast::AstNode*>();
 
 				if(val->getOperatorType()!=-1) {	//binary_operator: -1
-					THROW("lvalue required as "
-					      "left operand of assignment")
+					THROW_S(err::LvalueRequieredLeftOperand())
 				}
 
 				ast::AstUnary* unary = (ast::AstUnary*)val->Children()->at(0);
 
 				if(unary->getOperatorType()!=-1) {	//unary_operator: -1
-					THROW("lvalue required as "
-					      "left operand of assignment")
+					THROW_S(err::LvalueRequieredLeftOperand())
 				}
 
 				ArrayList<ast::AstNode*>* children = unary->Children();
@@ -1016,8 +1065,7 @@ namespace stamon::c {
 
 				if(quark->getType()!=ast::AstIdentifierType) {
 					//quark: IDEN
-					THROW("lvalue required as "
-					      "left operand of assignment")
+					THROW_S(err::LvalueRequieredLeftOperand())
 				}
 
 				CE
@@ -1032,8 +1080,7 @@ namespace stamon::c {
 					    p->getPostfixType()!=ast::PostfixMemberType
 					    &&p->getPostfixType()!=ast::PostfixElementType
 					) {	//如果不满足左值后缀条件
-						THROW("lvalue required as "
-						      "left operand of assignment")
+						THROW_S(err::LvalueRequieredLeftOperand())
 					}
 
 
@@ -1104,7 +1151,7 @@ namespace stamon::c {
 			ast::AstUnary* unary_operator() {
 				//判断是否还有前缀的单目运算符
 				unary_check(TokenAdd, UnaryPositiveType)
-				unary_check(TokenSub, UnaryNegative)
+				unary_check(TokenSub, UnaryNegativeType)
 				unary_check(TokenBitNot, UnaryInverseType)
 				unary_check(TokenLogNot, UnaryNotType)
 				//如果没有，则直接返回quark { postfix }
@@ -1189,7 +1236,7 @@ namespace stamon::c {
 					           line, ast::PostfixMemberType, iden
 					       );
 				}
-				THROW("invalid syntax")
+				THROW_S(err::InvalidSyntax())
 				return NULL;
 			}
 
@@ -1253,7 +1300,7 @@ namespace stamon::c {
 					return anon_class();
 				}
 				CE
-				THROW("invalid syntax")
+				THROW_S(err::InvalidSyntax());
 				return NULL;
 			}
 
@@ -1282,11 +1329,7 @@ namespace stamon::c {
 
 				if(isIdenExist==false) {
 					//未声明的标识符
-					THROW_S(
-					    String((char*)"undefined variable: \"")
-					    + tok->iden
-					    + String((char*)"\"")
-					)
+					THROW_S(err::UndefinedVariable(tok->iden))
 
 					return NULL;
 				}
@@ -1310,7 +1353,7 @@ namespace stamon::c {
 					ParsingLineNo = matcher.Peek(0)->lineNo;
 					return Ast<ast::AstIntNumber>(_pop->lineNo, 0);
 				} else {
-					THROW("invalid syntax")
+					THROW_S(err::InvalidSyntax());
 				}
 				return NULL;
 			}
@@ -1367,45 +1410,6 @@ namespace stamon::c {
 			}
 	};
 }
-
-/*
-
-实例：
-
-class c {
-	func helloworld(this) {
-		print("Hello world!");
-	}
-}
-
-def main = func {
-	def cls = c.new;
-	cls.helloworld();
-}();
-
-类 输出类 {
-	函数 你好世界（后台） {
-		输出（“Hello world!”）；
-	}
-}
-
-设 主 = 函数() {
-	设 类对象 = 输出类——新建；
-	类对象——你好世界();
-}
-
-类 输出类 {
-	函数 你好世界（后台） {
-		输出（“Hello world!”）；
-	}
-}
-
-设 主 = 函数 {
-	设 类对象 = 输出类——新建；
-	类对象——你好世界（）；
-}（）；
-
-*/
 
 #undef check
 #undef pop
