@@ -32,12 +32,8 @@ void console_log(char* msg) {
 #define LOG_S(s) console_log(s.getstr())
 
 String getNoEndingSeparatorPath(String path);	//获取末尾没有分隔符的路径
-void checkEnvironmentVariableWarning();	//检查环境变量是否存在，不存在则输出警告
-int StamonVersionCommand();
-int StamonHelpCommand();
 int StamonBuildCommand(ArrayList<String> args);
 int StamonRunCommand(ArrayList<String> args);
-int StamonStripCommand(ArrayList<String> args);
 
 int StamonMain(int argc, char* argv[]) {
 
@@ -72,32 +68,6 @@ int StamonMain(int argc, char* argv[]) {
 	) {
 		return StamonRunCommand(args);
 
-	} else if(
-	    args[0].equals(String((char*)"strip"))
-	    ||args[0].equals(String((char*)"-s"))
-	) {
-		return StamonStripCommand(args);
-
-	} else if(
-	    args[0].equals(String((char*)"help"))
-	    ||args[0].equals(String((char*)"-h"))
-	) {
-		return StamonHelpCommand();
-
-	} else if(
-	    args[0].equals(String((char*)"version"))
-	    ||args[0].equals(String((char*)"-v"))
-	) {
-		return StamonVersionCommand();
-
-	} else {
-		checkEnvironmentVariableWarning();
-		platform_print(
-		    "stamon: fatal error: bad command\n"
-		    "please enter \'stamon help\' "
-		    "to get more information.\n"
-		);
-		return -1;
 	}
 
 	return 0;
@@ -112,67 +82,7 @@ String getNoEndingSeparatorPath(String path) {
 	return path;
 }
 
-void checkEnvironmentVariableWarning() {
-	if(getenv("STAMON")==NULL) {
-		platform_print(
-		    "stamon: warning: missing enviroment variable \"STAMON\"\n"
-		    "please enter \'stamon help\' to get more information.\n"
-		);
-	}
-}
-
-int StamonVersionCommand() {
-	checkEnvironmentVariableWarning();
-	platform_print(
-		"stamon %d.%d.%d\n"
-		"Be Released by CLimber-Rong(github.com/CLimber-Rong/)\n"
-		"Open Source on \'https://github.com/CLimber-Rong/stamon/\'\n"
-		"This program has absolutely no warranty.\n",
-		STAMON_VER_X, STAMON_VER_Y, STAMON_VER_Z
-	);
-	return 0;
-}
-
-int StamonHelpCommand() {
-	checkEnvironmentVariableWarning(); 
-	platform_print(
-	    "Usage: stamon options [arguments..]\n"
-	    "Options:\n"
-	    "\tversion | -v\t\t\tDisplay this version.\n"
-	    "\thelp | -h\t\t\tDisplay this information.\n"
-	    "\tbuild | -b\t\t\tBuild this source to program.\n"
-	    "\t\t<filename>\t\tSource filename (Required)\n"
-	    "\t\t<filename>\t\tTarget filename\n"
-	    "\t\t--import=<boolean>\t\tSupport import flag\n"
-	    "\t\t--strip=<boolean>\t\tStrip debug information flag\n"
-	    "\t\t-I<path>\t\tAdd include path\n"
-		"\t\t--IgnoreWarning\t\tDo not print warnings\n"
-		"\t\t--JustWarn\t\tWarnings are just warnings\n"
-		"\t\t--FatalWarning\t\tMake warnings block compilation\n"
-		"\t\t--locale=<text>\t\tSet Language Environment\n"
-	    "\trun | -r\t\t\tRun STVC.\n"
-	    "\t\t<filename>\t\tSource filename (Required)\n"
-	    "\t\t--GC=<boolean>\t\tGC flag\n"
-	    "\t\t--MemLimit=<Integer>\tSet VM memory limit\n"
-		"\t\t--MemPoolCache=<Integer>\tSet MemoryPool Cache Size\n"
-		"\t\t--IgnoreWarning\t\tDo not print warnings\n"
-		"\t\t--JustWarn\t\tWarnings are just warnings\n"
-		"\t\t--FatalWarning\t\tMake warnings block compilation\n"
-		"\t\t--locale=<text>\t\tSet Language Environment\n"
-	    "\tstrip | -s\t\t\tStrip STVC.\n"
-	    "\t\t<filename>\t\tSource filename (Required)\n"
-	);
-	return 0;
-}
-
 int StamonBuildCommand(ArrayList<String> args) {
-	if(getenv("STAMON")==NULL) {
-		platform_print(
-			"stamon: fatal error: missing enviroment variable \"STAMON\"\n"
-			"please enter \'stamon help\' to get more information.\n"
-		);
-		return -1;
-	}
 
 	String program_path(getenv("STAMON"));
 
@@ -290,7 +200,7 @@ int StamonBuildCommand(ArrayList<String> args) {
 		}
 
 		for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-			platform_print("%s\n", stamon.WarningMsg->at(i).getstr());
+			platform_print(stamon.WarningMsg->at(i).getstr());
 		}
 		if(warning_level==StamonWarningSafeLevel_FatalWarning) {
 			return -1;
@@ -300,7 +210,7 @@ int StamonBuildCommand(ArrayList<String> args) {
 	if(stamon.ErrorMsg->empty()==false) {
 		platform_print("stamon: compile: fatal error:\n");
 		for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-			platform_print("%s\n", stamon.ErrorMsg->at(i).getstr());
+			platform_print(stamon.ErrorMsg->at(i).getstr());
 		}
 		return -1;
 	}
@@ -309,8 +219,6 @@ int StamonBuildCommand(ArrayList<String> args) {
 }
 
 int StamonRunCommand(ArrayList<String> args) {
-	
-	checkEnvironmentVariableWarning();
 
 	String src;
 
@@ -397,7 +305,7 @@ int StamonRunCommand(ArrayList<String> args) {
 			platform_print("stamon: run: fatal error:\n");
 		}
 		for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-			platform_print("%s\n", stamon.WarningMsg->at(i).getstr());
+			platform_print(stamon.WarningMsg->at(i).getstr());
 		}
 		if(warning_level==StamonWarningSafeLevel_FatalWarning) {
 			return -1;
@@ -407,79 +315,12 @@ int StamonRunCommand(ArrayList<String> args) {
 	if(stamon.ErrorMsg->empty()==false) {
 		platform_print("stamon: run: fatal error:\n");
 		for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-			platform_print("%s\n", stamon.ErrorMsg->at(i).getstr());
+			platform_print(stamon.ErrorMsg->at(i).getstr());
 		}
 		return -1;
 	}
 
 	return 0;
-}
-
-int StamonStripCommand(ArrayList<String> args) {
-	checkEnvironmentVariableWarning();
-
-		String src;
-
-		//strip功能的默认警告重要程度与编译器一致
-		int warning_level = stamon::c::config::WarningLevel;
-
-		if(args.size()<2) {
-			platform_print("stamon: strip: too few arguments\n"
-			       "please enter \'stamon help\' "
-			       "to get more information.\n");
-			return -1;
-		} else {
-			src = args[1];
-			for(int i=2;i<args.size();i++) {
-				if(args[i].equals(String((char*)"--IgnoreWarning"))) {
-
-					warning_level = StamonWarningSafeLevel_IgnoreWarning;
-				
-				} else if(args[i].equals(String((char*)"--JustWarn"))) {
-
-					warning_level = StamonWarningSafeLevel_JustWarn;
-				
-				} else if(args[i].equals(String((char*)"--FatalWarning"))) {
-
-					warning_level = StamonWarningSafeLevel_FatalWarning;
-				
-				}
-			}
-		}
-
-		Stamon stamon;
-
-		stamon.Init();
-
-		stamon.strip(src);
-
-		if(
-			stamon.WarningMsg->empty()==false
-			&& warning_level != StamonWarningSafeLevel_IgnoreWarning
-		) {
-			if(warning_level==StamonWarningSafeLevel_JustWarn) {
-				platform_print("stamon: strip: warning:\n");
-			} else if(warning_level==StamonWarningSafeLevel_FatalWarning) {
-				platform_print("stamon: strip: fatal error:\n");
-			}
-			for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-				platform_print("%s\n", stamon.WarningMsg->at(i).getstr());
-			}
-			if(warning_level==StamonWarningSafeLevel_FatalWarning) {
-				return -1;
-			}
-		}
-
-		if(stamon.ErrorMsg->empty()==false) {
-			platform_print("stamon: strip: fatal error:\n");
-			for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-				platform_print("%s\n", stamon.ErrorMsg->at(i).getstr());
-			}
-			return -1;
-		}
-
-		return 0;
-		
 }
 
 void close_binary_buffer() {
