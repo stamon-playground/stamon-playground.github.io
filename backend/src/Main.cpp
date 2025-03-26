@@ -53,7 +53,7 @@ int StamonMain(int argc, char* argv[]) {
 
 	if(args.empty()) {
 		//没有传入任何参数
-		printf(
+		platform_print(
 		    "stamon: fatal error: too few arguments\n"
 		    "please enter \'stamon help\' to get more information.\n"
 		);
@@ -92,7 +92,7 @@ int StamonMain(int argc, char* argv[]) {
 
 	} else {
 		checkEnvironmentVariableWarning();
-		printf(
+		platform_print(
 		    "stamon: fatal error: bad command\n"
 		    "please enter \'stamon help\' "
 		    "to get more information.\n"
@@ -114,7 +114,7 @@ String getNoEndingSeparatorPath(String path) {
 
 void checkEnvironmentVariableWarning() {
 	if(getenv("STAMON")==NULL) {
-		printf(
+		platform_print(
 		    "stamon: warning: missing enviroment variable \"STAMON\"\n"
 		    "please enter \'stamon help\' to get more information.\n"
 		);
@@ -123,7 +123,7 @@ void checkEnvironmentVariableWarning() {
 
 int StamonVersionCommand() {
 	checkEnvironmentVariableWarning();
-	printf(
+	platform_print(
 		"stamon %d.%d.%d\n"
 		"Be Released by CLimber-Rong(github.com/CLimber-Rong/)\n"
 		"Open Source on \'https://github.com/CLimber-Rong/stamon/\'\n"
@@ -135,7 +135,7 @@ int StamonVersionCommand() {
 
 int StamonHelpCommand() {
 	checkEnvironmentVariableWarning(); 
-	printf(
+	platform_print(
 	    "Usage: stamon options [arguments..]\n"
 	    "Options:\n"
 	    "\tversion | -v\t\t\tDisplay this version.\n"
@@ -167,7 +167,7 @@ int StamonHelpCommand() {
 
 int StamonBuildCommand(ArrayList<String> args) {
 	if(getenv("STAMON")==NULL) {
-		printf(
+		platform_print(
 			"stamon: fatal error: missing enviroment variable \"STAMON\"\n"
 			"please enter \'stamon help\' to get more information.\n"
 		);
@@ -246,7 +246,7 @@ int StamonBuildCommand(ArrayList<String> args) {
 				} else {
 
 					//错误参数
-					printf(
+					platform_print(
 						"stamon: compile: bad command\n"
 						"please enter \'stamon help\' "
 						"to get more information.\n"
@@ -258,7 +258,7 @@ int StamonBuildCommand(ArrayList<String> args) {
 			}
 		}
 	} else {
-		printf("stamon: build: too few arguments\n"
+		platform_print("stamon: build: too few arguments\n"
 			   "please enter \'stamon help\' "
 			   "to get more information.\n");
 		return -1;
@@ -284,13 +284,13 @@ int StamonBuildCommand(ArrayList<String> args) {
 		&& warning_level != StamonWarningSafeLevel_IgnoreWarning
 	) {
 		if(warning_level==StamonWarningSafeLevel_JustWarn) {
-			printf("stamon: compile: warning:\n");
+			platform_print("stamon: compile: warning:\n");
 		} else if(warning_level==stamon::config::StamonWarningSafeLevel_FatalWarning) {
-			printf("stamon: compile: fatal error:\n");
+			platform_print("stamon: compile: fatal error:\n");
 		}
 
 		for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-			printf("%s\n", stamon.WarningMsg->at(i).getstr());
+			platform_print("%s\n", stamon.WarningMsg->at(i).getstr());
 		}
 		if(warning_level==StamonWarningSafeLevel_FatalWarning) {
 			return -1;
@@ -298,9 +298,9 @@ int StamonBuildCommand(ArrayList<String> args) {
 	}
 
 	if(stamon.ErrorMsg->empty()==false) {
-		printf("stamon: compile: fatal error:\n");
+		platform_print("stamon: compile: fatal error:\n");
 		for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-			printf("%s\n", stamon.ErrorMsg->at(i).getstr());
+			platform_print("%s\n", stamon.ErrorMsg->at(i).getstr());
 		}
 		return -1;
 	}
@@ -321,7 +321,7 @@ int StamonRunCommand(ArrayList<String> args) {
 	int PoolCacheSize = stamon::vm::config::PoolCacheSize;
 
 	if(args.size()<2) {
-		printf("stamon: run: too few arguments\n"
+		platform_print("stamon: run: too few arguments\n"
 			   "please enter \'stamon help\' "
 			   "to get more information.\n");
 		return -1;
@@ -371,7 +371,7 @@ int StamonRunCommand(ArrayList<String> args) {
 				setlocale(LC_ALL, args[i].substring(9,args[i].length()).getstr());
 
 			} else {
-				printf(
+				platform_print(
 					"stamon: run: bad command\n"
 					"please enter \'stamon help\' "
 					"to get more information.\n"
@@ -392,12 +392,12 @@ int StamonRunCommand(ArrayList<String> args) {
 		&& warning_level != StamonWarningSafeLevel_IgnoreWarning
 	) {
 		if(warning_level==StamonWarningSafeLevel_JustWarn) {
-			printf("stamon: run: warning:\n");
+			platform_print("stamon: run: warning:\n");
 		} else if(warning_level==StamonWarningSafeLevel_FatalWarning) {
-			printf("stamon: run: fatal error:\n");
+			platform_print("stamon: run: fatal error:\n");
 		}
 		for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-			printf("%s\n", stamon.WarningMsg->at(i).getstr());
+			platform_print("%s\n", stamon.WarningMsg->at(i).getstr());
 		}
 		if(warning_level==StamonWarningSafeLevel_FatalWarning) {
 			return -1;
@@ -405,9 +405,9 @@ int StamonRunCommand(ArrayList<String> args) {
 	}
 
 	if(stamon.ErrorMsg->empty()==false) {
-		printf("stamon: run: fatal error:\n");
+		platform_print("stamon: run: fatal error:\n");
 		for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-			printf("%s\n", stamon.ErrorMsg->at(i).getstr());
+			platform_print("%s\n", stamon.ErrorMsg->at(i).getstr());
 		}
 		return -1;
 	}
@@ -424,7 +424,7 @@ int StamonStripCommand(ArrayList<String> args) {
 		int warning_level = stamon::c::config::WarningLevel;
 
 		if(args.size()<2) {
-			printf("stamon: strip: too few arguments\n"
+			platform_print("stamon: strip: too few arguments\n"
 			       "please enter \'stamon help\' "
 			       "to get more information.\n");
 			return -1;
@@ -458,12 +458,12 @@ int StamonStripCommand(ArrayList<String> args) {
 			&& warning_level != StamonWarningSafeLevel_IgnoreWarning
 		) {
 			if(warning_level==StamonWarningSafeLevel_JustWarn) {
-				printf("stamon: strip: warning:\n");
+				platform_print("stamon: strip: warning:\n");
 			} else if(warning_level==StamonWarningSafeLevel_FatalWarning) {
-				printf("stamon: strip: fatal error:\n");
+				platform_print("stamon: strip: fatal error:\n");
 			}
 			for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-				printf("%s\n", stamon.WarningMsg->at(i).getstr());
+				platform_print("%s\n", stamon.WarningMsg->at(i).getstr());
 			}
 			if(warning_level==StamonWarningSafeLevel_FatalWarning) {
 				return -1;
@@ -471,9 +471,9 @@ int StamonStripCommand(ArrayList<String> args) {
 		}
 
 		if(stamon.ErrorMsg->empty()==false) {
-			printf("stamon: strip: fatal error:\n");
+			platform_print("stamon: strip: fatal error:\n");
 			for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-				printf("%s\n", stamon.ErrorMsg->at(i).getstr());
+				platform_print("%s\n", stamon.ErrorMsg->at(i).getstr());
 			}
 			return -1;
 		}
