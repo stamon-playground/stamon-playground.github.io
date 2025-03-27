@@ -12,7 +12,7 @@ Stamon = class {
 
     func version(self) {
         //返回版本号
-        return native("version");
+        return native("version", null);
     }
     
 }.new;
