@@ -190,7 +190,7 @@ int StamonBuildCommand(ArrayList<String> args) {
 	stamon.compile(src, dst, isSupportImport, isStrip);
 
 	if(
-		stamon.WarningMsg->empty()==false
+		stamon.WarningMsg.empty()==false
 		&& warning_level != StamonWarningSafeLevel_IgnoreWarning
 	) {
 		if(warning_level==StamonWarningSafeLevel_JustWarn) {
@@ -199,18 +199,18 @@ int StamonBuildCommand(ArrayList<String> args) {
 			platform_print("stamon: compile: fatal error:\n");
 		}
 
-		for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-			platform_print(stamon.WarningMsg->at(i).getstr());
+		for(int i=0,len=stamon.WarningMsg.size(); i<len; i++) {
+			platform_print(stamon.WarningMsg.at(i).getstr());
 		}
 		if(warning_level==StamonWarningSafeLevel_FatalWarning) {
 			return -1;
 		}
 	}
 
-	if(stamon.ErrorMsg->empty()==false) {
+	if(stamon.ErrorMsg.empty()==false) {
 		platform_print("stamon: compile: fatal error:\n");
-		for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-			platform_print(stamon.ErrorMsg->at(i).getstr());
+		for(int i=0,len=stamon.ErrorMsg.size(); i<len; i++) {
+			platform_print(stamon.ErrorMsg.at(i).getstr());
 		}
 		return -1;
 	}
@@ -296,7 +296,7 @@ int StamonRunCommand(ArrayList<String> args) {
 	stamon.run(src, isGC, MemLimit, PoolCacheSize);
 
 	if(
-		stamon.WarningMsg->empty()==false
+		stamon.WarningMsg.empty()==false
 		&& warning_level != StamonWarningSafeLevel_IgnoreWarning
 	) {
 		if(warning_level==StamonWarningSafeLevel_JustWarn) {
@@ -304,18 +304,18 @@ int StamonRunCommand(ArrayList<String> args) {
 		} else if(warning_level==StamonWarningSafeLevel_FatalWarning) {
 			platform_print("stamon: run: fatal error:\n");
 		}
-		for(int i=0,len=stamon.WarningMsg->size(); i<len; i++) {
-			platform_print(stamon.WarningMsg->at(i).getstr());
+		for(int i=0,len=stamon.WarningMsg.size(); i<len; i++) {
+			platform_print(stamon.WarningMsg.at(i).getstr());
 		}
 		if(warning_level==StamonWarningSafeLevel_FatalWarning) {
 			return -1;
 		}
 	}
 
-	if(stamon.ErrorMsg->empty()==false) {
+	if(stamon.ErrorMsg.empty()==false) {
 		platform_print("stamon: run: fatal error:\n");
-		for(int i=0,len=stamon.ErrorMsg->size(); i<len; i++) {
-			platform_print(stamon.ErrorMsg->at(i).getstr());
+		for(int i=0,len=stamon.ErrorMsg.size(); i<len; i++) {
+			platform_print(stamon.ErrorMsg.at(i).getstr());
 		}
 		return -1;
 	}
