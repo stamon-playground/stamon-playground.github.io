@@ -11,18 +11,18 @@
   "license": "MIT",
   "dependencies": {
     "@mdi/js": "^7.4.47",
-    "@suid/material": "^0.17.0",
+    "@suid/material": "^0.19.0",
     "solid-gesture": "^0.0.3",
-    "solid-js": "^1.8.22",
+    "solid-js": "^1.9.19",
     "solid-prism-editor": "^1.2.0"
   },
   "devDependencies": {
-    "@suid/vite-plugin": "^0.3.0",
-    "terser": "^5.31.6",
-    "vite": "^5.4.2",
-    "vite-plugin-minify": "^2.0.0",
-    "vite-plugin-pwa": "^0.20.2",
-    "vite-plugin-solid": "^2.10.2",
-    "workbox-window": "^7.1.0"
+    "@suid/vite-plugin": "^0.3.1",
+    "terser": "^5.51.2",
+    "vite": "^5.4.21",
+    "vite-plugin-minify": "^2.1.0",
+    "vite-plugin-pwa": "^0.20.5",
+    "vite-plugin-solid": "^2.11.16",
+    "workbox-window": "^7.4.1"
   }
 }

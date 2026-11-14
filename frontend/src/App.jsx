@@ -1,4 +1,4 @@
-import { createSignal, createMemo, onMount } from "solid-js"
+import { createSignal, createMemo, onMount, Show } from "solid-js"
 import CssBaseline from "@suid/material/CssBaseline"
 import Box from "@suid/material/Box"
 import Toolbar from "@suid/material/Toolbar"
@@ -22,6 +22,7 @@ import { useDrag } from 'solid-gesture'
 import { Editor, languageMap } from "solid-prism-editor"
 import { basicSetup } from "solid-prism-editor/setups"
 import { languages } from "solid-prism-editor/prism"
+import { getLineBefore } from "solid-prism-editor/utils"
 import GithubLight from "solid-prism-editor/themes/github-light.css?inline"
 import GithubDark from "solid-prism-editor/themes/github-dark.css?inline"
 import StamonWorker from "./worker.js?worker"
@@ -323,7 +324,7 @@ export default () => {
               <MenuItem
                 dense
                 component={Link}
-                href="https://github.com/CLimber-Rong/stamon" target="_blank"
+                href="https://github.com/CLimber-Rong/stamon/tree/legacy" target="_blank"
               >
                 <ListItemIcon>
                   <SvgIcon><path d={mdiGithub} /></SvgIcon>
