@@ -1,0 +1,8 @@
+# pnpm 11 起改用 allowBuilds 显式声明可执行构建脚本的依赖
+# esbuild 安装时需运行 postinstall 落地对应平台的二进制
+allowBuilds:
+  esbuild: true
+
+# 不把 tarball URL 写入 lockfile
+# 否则 lockfile 会绑定到生成时的镜像站，换用官方 registry 的 CI 校验必然失败
+lockfileIncludeTarballUrl: false
