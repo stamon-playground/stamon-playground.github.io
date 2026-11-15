@@ -1,96 +1,82 @@
-debug:
+COMPILER = emcc
+STD = c++17
+PNPM = pnpm
 
-	xcopy src\bin-include bin\include /s /e /y /i
-	emcc src/Main.cpp \
-	-o bin/Stamon.js \
-	-sFORCE_FILESYSTEM -sEXIT_RUNTIME=1 \
-	-O2 -sWASM=0 \
-	-std=c++17 \
-	-I include/web_implemented \
-	-I src/ast \
-	-I src/data_type \
-	-I src/vm \
-	-I src/ir \
-	-I src/compiler \
-	-I src/sfn \
-	-I src \
-	--js-library include/web_implemented/js_lib.js \
-	-s ALLOW_MEMORY_GROWTH=1 \
-	"-sEXPORTED_RUNTIME_METHODS=['stringToNewUTF8']" \
-	"-sEXPORTED_FUNCTIONS=['_malloc', '_free']" \
-	-lm
-	node bin/Stamon.js
+# 特判复制工具
+ifeq ($(OS),Windows_NT)
+SHELL = cmd.exe
+COPY_DIR = xcopy $(subst /,\,$(1)) $(subst /,\,$(2)) /e /y /i
+COPY_FILE = copy /Y $(subst /,\,$(1)) $(subst /,\,$(2))
+else
+COPY_DIR = mkdir -p $(2) && cp -r $(1)/. $(2)/
+COPY_FILE = cp $(1) $(2)
+endif
 
-debug_html:
+# 移植接口定义
+BASIC_LINK =	-I backend/include/pure \
+				-I backend/include/ArrayList/interface \
+				-I backend/include/BasicIo/interface \
+				-I backend/include/BasicPlatform/interface \
+				-I backend/include/SmartPtr/interface \
+				-I backend/include/FileReader/interface \
+				-I backend/include/FileWriter/interface \
+				-I backend/include/HashMap/interface \
+				-I backend/include/MemoryPool/interface \
+				-I backend/include/Stack/interface \
+				-I backend/include/String/interface \
+				-I backend/src/ast \
+				-I backend/src/datatype \
+				-I backend/src/vm \
+				-I backend/src/ir \
+				-I backend/src/compiler \
+				-I backend/src/sfn \
+				-I backend/src/action \
+				-I backend/src/exception \
+				-I backend/src/config \
+				-I backend/src
 
-	xcopy src\bin-include bin\include /s /e /y /i
-	emcc src/Main.cpp \
-	-o Stamon.html \
-	-sFORCE_FILESYSTEM -sEXIT_RUNTIME=1 \
-	-O2 -sWASM=0 \
-	-std=c++17 \
-	-I include/web_implemented \
-	-I src/ast \
-	-I src/data_type \
-	-I src/vm \
-	-I src/ir \
-	-I src/compiler \
-	-I src/sfn \
-	-I src \
-	-s ALLOW_MEMORY_GROWTH=1 \
-	"-sEXPORTED_RUNTIME_METHODS=['stringToNewUTF8']" \
-	"-sEXPORTED_FUNCTIONS=['_malloc', '_free']" \
-	-lm
-	node bin/Stamon.js
+# Playground的移植接口实现
+PLAYGROUND_LINK =	-I backend/include/PlaygroundUtility \
+					-I backend/include/FileReader/web-playground \
+					-I backend/include/FileWriter/web-playground \
+					-I backend/include/BasicIo/web-playground
 
-website:
+# 与Playground交互无关的模块采用stdcpp实现
+STDCPP_LINK =	-I backend/include/ArrayList/stdcpp \
+				-I backend/include/BasicPlatform/stdcpp \
+				-I backend/include/SmartPtr/stdcpp \
+				-I backend/include/HashMap/stdcpp \
+				-I backend/include/MemoryPool/stdc \
+				-I backend/include/Stack/stdcpp \
+				-I backend/include/String/stdcpp \
+				-lm
 
-# -----编译后端代码，并将目标文件输出至前端-----
+LINK = $(BASIC_LINK) $(PLAYGROUND_LINK) $(STDCPP_LINK)
 
-# 把Stamon标准库复制到bin目录下，方便下一步进行
-	xcopy backend\src\bin-include backend\bin\include /s /e /y /i
+JS_LIBRARY = backend/include/PlaygroundUtility/PlaygroundUtility.js
 
-# 用Python把Stamon标准库写入程序数据
-	cd backend && \
-	python StamonBuildSystem.py gen_data
+.PHONY: all stamon-lib backend frontend
 
-# 编译程序
-	cd backend && \
-	emcc src/Main.cpp \
-	-o ../frontend/src/stamon.js \
-	-std=c++17 \
+all: backend frontend
+
+stamon-lib:
+	$(call COPY_DIR,backend/src/bin-include,frontend/public/stamon-lib)
+	$(call COPY_FILE,backend/LICENSE,frontend/public/stamon-lib/LICENSE)
+
+backend: stamon-lib
+	$(COMPILER) backend/src/Main.cpp \
+	-o frontend/src/stamon.js \
+	-std=$(STD) \
 	-Oz \
-	-I include/web_implemented \
-	-I src/ast \
-	-I src/data_type \
-	-I src/vm \
-	-I src/ir \
-	-I src/compiler \
-	-I src/sfn  \
-	-I src/tac \
-	-I src/action \
-	-I src/error \
-	-I src/config \
-	-I src \
-	-s WASM=0 \
-	-s FORCE_FILESYSTEM \
-	-s EXIT_RUNTIME=1 \
+	$(LINK) \
 	-s EXPORT_ES6=1 \
-    -s MODULARIZE=1 \
-    -s ENVIRONMENT='web' \
+	-s MODULARIZE=1 \
+	-s ENVIRONMENT='web' \
 	-s USE_ES6_IMPORT_META=0 \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s "EXPORTED_RUNTIME_METHODS=stringToNewUTF8" \
-	-s "EXPORTED_FUNCTIONS=_malloc,_free" \
-	--js-library include/web_implemented/js_lib.js
+	-s "EXPORTED_FUNCTIONS=_malloc,_free,_RunStamon" \
+	--js-library $(JS_LIBRARY)
 
-# 修改js的Module对象为导出模式
-#	cd backend && \
-#	python StamonBuildSystem.py edit_js
-
-# -----编译前端界面-----
-#	cd frontend && pnpm install
-#	cd frontend && pnpm build
-
-# -----将编译好的网站复制到根目录-----
-# 	xcopy frontend\dist . /s /e /y /i
+frontend:
+	cd frontend && $(PNPM) install && $(PNPM) build

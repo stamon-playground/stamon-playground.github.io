@@ -1,6 +1,6 @@
 /*
 	Name: TypeCalculator.cpp
-	Copyright: Apache 2.0
+	License: Apache 2.0
 	Author: CLimber-Rong
 	Date: 04/01/25 16:46
 	Description: 类型计算器
@@ -8,11 +8,9 @@
 
 #pragma once
 
-#include"Lexer.cpp"
+#include"Token.cpp"
 #include"DataType.hpp"
-#include"Exception.hpp"
 #include"ObjectManager.cpp"
-
 
 //为了方便开发，我编写了一系列简写的宏
 #define DTT datatype::DataType
@@ -35,8 +33,6 @@
                     ||(dt->getType()==IDFLT)\
                     ||(dt->getType()==IDDBL)\
                   )
-
-#define TYPEERR(dt) THROW_S(getDataTypeName(dt->getType()))
 
 #define NEWDT(type) manager->MallocObject<type>
 
@@ -62,12 +58,12 @@ namespace stamon::vm {
 			(datatype::DataType* a, datatype::DataType* b);
             //由类方法所组成的数组
 
-            STMException* ex;
+            log::Exception* ex;
             ObjectManager* manager;
 
             TypeCalculator() {}
 
-            TypeCalculator(STMException* e, ObjectManager* man) {
+            TypeCalculator(log::Exception* e, ObjectManager* man) {
                 ex = e;
                 manager = man;
 
@@ -118,7 +114,7 @@ namespace stamon::vm {
                 }
             }
 
-            inline bool CheckUnaryOperator(int optype) {
+            inline bool checkUnaryOperator(int optype) {
                 /*
                  * 检查该运算符是否合理，是则返回true，否则返回false
                  */
@@ -126,13 +122,13 @@ namespace stamon::vm {
                     && optype<=ast::UnaryTypeCount;
             }
 
-            bool CheckUnaryOperandType(
+            bool checkUnaryOperandType(
                 datatype::DataType* a, int optype
             ) {
                 /*
                  * 检查运算数的类型是否合理
                  * 合理则返回true，否则返回false
-                 * 在调用此函数前，请先调用CheckUnaryOperator来确保运算符是合理的
+                 * 在调用此函数前，请先调用checkUnaryOperator来确保运算符是合理的
                  */
                 switch (optype)
                 {
@@ -156,13 +152,13 @@ namespace stamon::vm {
                  * 单目运算，给定需要运算的a，以及运算类型optype，计算后返回结果
                  * optype以ExprAst.cpp的_UnaryOperatorType为准
                  * 调用该函数之前请先分别调用：
-                 * CheckUnaryOperator和CheckUnaryOperandType
+                 * checkUnaryOperator和checkUnaryOperandType
                  * 来确保运算符的合理性和运算数类型的合理性
                  */
                 return (this->*(UnCalcFunc[optype]))(a);
             }
 
-            inline bool CheckBinaryOperator(int optype) {
+            inline bool checkBinaryOperator(int optype) {
                 /*
                  * 检查该运算符是否合理，是则返回true，否则返回false
                  */
@@ -170,13 +166,13 @@ namespace stamon::vm {
                     && optype<=ast::BinaryTypeCount;
             }
 
-            bool CheckBinaryOperandType(
+            bool checkBinaryOperandType(
                 datatype::DataType* a, int optype, datatype::DataType* b
             ) {
                 /*
                  * 检查运算数的类型是否合理
                  * 合理则返回true，否则返回false
-                 * 在调用此函数前，请先调用CheckBinaryOperator来确保运算符是合理的
+                 * 在调用此函数前，请先调用checkBinaryOperator来确保运算符是合理的
                  */
 
                 //部分运算的类型规则是相同的，因此我把case整合到一起，即跳转到同一代码
@@ -201,10 +197,17 @@ namespace stamon::vm {
                     if(ISNUM(a) && ISNUM(b)) {
                         return true;
                     }
+
+                    //特殊的，空值可以与任意数据类型进行判等
+                    if(a->getType()==IDNUL || b->getType()==IDNUL) {
+                        return true;
+                    }
+
                     //如果是非数字且两者非同类，必然无法判等
                     if(a->getType()!=b->getType()) {
                         return false;
                     }
+
                     //在保障两者同类的情况下，字符串、空值、类、函数都可以判等
                     /*
                      * 我想要解释一下接下来的做法
@@ -266,7 +269,7 @@ namespace stamon::vm {
                  * 双目运算，给定需要运算的a和b，以及运算类型optype，计算后返回结果
                  * optype以ExprAst.cpp的_BinaryOperatorType为准
                  * 调用该函数之前请先分别调用：
-                 * CheckBinaryOperator和CheckBinaryOperandType
+                 * checkBinaryOperator和checkBinaryOperandType
                  * 来确保运算符的合理性和运算数类型的合理性
                  */
                 return (this->*(BinCalcFunc[optype]))(a, b);
@@ -288,6 +291,15 @@ namespace stamon::vm {
 
                 case IDNUL:
                     return false;
+                
+                case IDSTR:
+                    return !((STR*)dt)->getVal().empty();
+                
+                case IDSEQ:
+                    return !((SEQ*)dt)->getVal().empty();
+                
+                case datatype::ClassTypeID:
+                    return true;
                 
                 default:
                     return true;
@@ -420,13 +432,29 @@ namespace stamon::vm {
                 if(a->getType()==IDINT || b->getType()==IDINT) { \
                     return NEWDT(INT)(toInt(a) op toInt(b)); \
                 }
+            
+            //将数字比较计算的代码封装到一个宏
+            #define LOGIC_CALCULATION(op) \
+                if(a->getType()==IDDBL || b->getType()==IDDBL) { \
+                    return NEWDT(INT)(toDouble(a) op toDouble(b)); \
+                } \
+                if(a->getType()==IDFLT || b->getType()==IDFLT) { \
+                    return NEWDT(INT)(toFloat(a) op toFloat(b)); \
+                } \
+                if(a->getType()==IDINT || b->getType()==IDINT) { \
+                    return NEWDT(INT)(toInt(a) op toInt(b)); \
+                }
 
             //封装判等和判不等的运算
             #define DEFINE_EQU_OPERATE(name, op) \
                 DTT* name(DTT* a, DTT* b) { \
+                    if(a->getType()==IDNUL || b->getType()==IDNUL) { \
+                        /*只有将两个空值进行判等，结果才为true*/ \
+                        return NEWDT(INT)(a->getType() op b->getType()); \
+                    } \
                     switch (a->getType()) \
                     { \
-                    /*特判类和函数*/ \
+                    /*特判类和函数和空值*/ \
                     \
                     case datatype::ClassTypeID: \
                         return NEWDT(INT)( \
@@ -438,6 +466,14 @@ namespace stamon::vm {
                         return NEWDT(INT)( \
                                     ((datatype::MethodType*)a)->getVal() \
                                     op ((datatype::MethodType*)b)->getVal() \
+                        ); \
+                    \
+                    case datatype::NullTypeID: \
+                        return NEWDT(INT)(true); \
+                    \
+                    case IDSTR: \
+                        return NEWDT(INT)( \
+                            ((STR*)a)->getVal() op ((STR*)b)->getVal() \
                         ); \
                     \
                     default: \
@@ -464,7 +500,7 @@ namespace stamon::vm {
                         ); \
                     } \
                     \
-                    MATH_CALCULATION(op); \
+                    LOGIC_CALCULATION(op); \
                     \
                     return NULL; \
                     \
@@ -488,10 +524,32 @@ namespace stamon::vm {
                 }
 
                 if(a->getType()==IDSEQ) {
-                    return NEWDT(SEQ)(
-                        ((SEQ*)a)->getVal()
-                        + ((SEQ*)b)->getVal()
+                    const ArrayList<datatype::Variable*>
+                        &a_list = ((SEQ*)a)->getVal(),
+                        &b_list = ((SEQ*)b)->getVal();
+
+                    ArrayList<datatype::Variable*> merged_list(
+                        a_list.size() + b_list.size()
                     );
+
+                    for(int i=0,len=a_list.size(); i<len; i++) {
+                        merged_list[i] = new datatype::Variable(
+                            a_list[i]->data
+                        );
+                    }
+
+                    for(
+                        int i=0,a_len=a_list.size(),b_len=b_list.size();
+                        i<b_len;
+                        i++
+                    ) {
+                        merged_list[a_len+i] = new datatype::Variable(
+                            b_list[i]->data
+                        );
+                    }
+
+                    return NEWDT(SEQ)(merged_list);
+
                 }
 
                 MATH_CALCULATION(+);
@@ -539,10 +597,12 @@ namespace stamon::vm {
 
 
             #undef MATH_CALCULATION
+            #undef LOGIC_CALCULATION
 
     };
 }
 
+#undef DTT
 #undef INT
 #undef FLT
 #undef DBL
@@ -558,5 +618,8 @@ namespace stamon::vm {
 #undef IDSEQ
 
 #undef ISNUM
-#undef TYPEERR
+
 #undef NEWDT
+
+#undef BIND_UN
+#undef BIND_BIN

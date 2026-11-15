@@ -1,0 +1,22 @@
+/*
+	Name: SFNException.cpp
+	License: Apache 2.0
+	Author: CLimber-Rong
+	Date: 07/08/2025 20:00
+	Description: 报错信息函数，由codegen.py自动生成
+*/
+
+#pragma once
+#include "String.hpp"
+#include "Exception.hpp"
+
+namespace stamon::exception::sfn {
+inline log::Info SFNError(String position, String msg) {
+	return log::Info(String("sfn"), String("SFNError"), msg, position);
+}
+
+inline log::Info SFNWarning(String position, String msg) {
+	return log::Info(String("sfn"), String("SFNWarning"), msg, position);
+}
+
+}

@@ -1,6 +1,6 @@
 /*
 	Name: Compiler.hpp
-	Copyright: Apache 2.0
+	License: Apache 2.0
 	Author: CLimber-Rong
 	Date: 22/02/24 12:31
 	Description: 编译器头文件
@@ -8,120 +8,99 @@
 
 #pragma once
 
+#include "BufferStream.cpp"
 #include "Parser.cpp"
+#include "HashMap.hpp"
 
 namespace stamon::c {
-class Compiler {
-public:
-	FileMap filemap;
-	SyntaxScope global_scope;
-	ArrayList<SourceSyntax> *src;
-	STMException *ex;
-	ArrayList<String> *ErrorMsg;
-	ArrayList<String> *WarningMsg;
 
-	Compiler() {
+ArrayList<SourceSyntax> *ParseTargetProject(log::Exception *e,
+		ArrayList<String> *error_msg, ArrayList<String> *warning_msg,
+		String filename, bool is_support_import, ArrayList<SourceSyntax> *src,
+		HashMap<String, bool> filemap, SyntaxScope global_scope) {
+
+	log::Exception *ex = e;
+
+	filemap.put(filename, true);
+
+	action::BufferInStream stream(ex, filename);
+
+	CATCH {
+		error_msg->add(ex->getError().toString());
+		return NULL;
 	}
 
-	Compiler(Compiler &right) {
-		filemap = right.filemap;
-		global_scope = right.global_scope;
-		src = right.src;
-		ex = right.ex;
-		ErrorMsg = right.ErrorMsg;
-	}
+	ArrayList<String> lines = stream.readLines();
 
-	Compiler(STMException *e, ArrayList<String> *error_msg,
-			 ArrayList<String> *warning_msg)
-		: filemap(e)
-		, global_scope(e) {
+	int lineNo = 1;
+	Lexer lexer(ex, filename);
 
-		src = new ArrayList<SourceSyntax>();
-		ex = e;
-		ErrorMsg = error_msg;
-		WarningMsg = warning_msg;
-		
-	}
+	for (int i = 0; i < lines.size(); i++) {
+		String text = lines[i];
 
-	void compile(String filename, bool isSupportImport) {
-
-		LineReader reader = filemap.mark(filename);
+		int index = lexer.getLineTok(lineNo, text);
 
 		CATCH {
-			return;
-		}
-
-		int lineNo = 1;
-		Lexer lexer(ex);
-
-		while (reader.isMore()) {
-			String text = reader.getLine();
-
-			CATCH {
-				return;
-			}
-
-			int index = lexer.getLineTok(lineNo, text);
-
-			CATCH {
-				THROW_S(
-					String((char *) "Error: at \"") 
-					+ filename
-					+ String((char *) "\": ") 
-					+ toString(lineNo) + String((char *) ":")
-					+ toString(index) + String((char *) " : ") 
-					+ ex->getError()
-				)
-				ErrorMsg->add(ex->getError());
-
-				ex->isError = false;
-			}
-
-			CATCH_WARNING {
-				for (int i = 0, len = WARNING.size(); i < len; i++) {
-					String warning_msg = WARNING[i];
-					WarningMsg->add(
-						String((char *) "Warning: at \"") 
-						+ filename
-						+ String((char *) "\": ") 
-						+ toString(lineNo)
-						+ String((char *) ": ") + warning_msg
-					);
-				}
-				ex->isWarning = false;
-			}
-
-			lineNo++;
-		}
-
-		Matcher matcher(lexer, ex);
-		Parser *parser = new Parser(
-				matcher, ex, global_scope, filename, src, filemap, ErrorMsg,
-				isSupportImport);
-
-		ast::AstNode *node = parser->Parse(); // 语法分析
-
-		CATCH {
-			THROW_S(
-				String((char *) "Syntax Error: at \"") 
-				+ filename
-				+ String((char *) "\": ") 
-				+ toString(parser->ParsingLineNo)
-				+ String((char *) ": ") 
-				+ ex->getError()
-			)
-			ErrorMsg->add(ex->getError());
-
+			error_msg->add(ex->getError().toString());
 			ex->isError = false;
 		}
 
-		SourceSyntax syntax;
-		syntax.program = node;
-		syntax.filename = filename;
+		if (ISWARNING) {
+			for (int i = 0, len = ex->Warning.size(); i < len; i++) {
+				auto warning = ex->Warning[i];
+				warning_msg->add(warning.toString());
+			}
 
-		src->add(syntax);
+			ex->Warning.clear();	// 警告信息已转存，需清除ex中的警告
+			ex->isWarning = false;
+		}
 
-		reader.close();
+		lineNo++;
 	}
-};
+
+	Matcher matcher(lexer, ex);
+	Parser *parser = new Parser(matcher, ex, global_scope, filename, src,
+			filemap, error_msg, warning_msg, is_support_import);
+
+	ast::AstNode *node = parser->Parse(); // 语法分析
+
+	CATCH {
+		error_msg->add(ex->getError().toString());
+		ex->isError = false;
+	}
+
+	SourceSyntax syntax;
+	syntax.program = node;
+	syntax.filename = filename;
+
+	src->add(syntax);
+
+	return src;
+}
+
+ast::AstNode *MergeAST(ArrayList<SourceSyntax> *syntax_list) {
+	ArrayList<ast::AstNode *> *program = new ArrayList<ast::AstNode *>();
+
+	for (int i = 0, len = syntax_list->size(); i < len; i++) {
+		// 获取该文件的AST根节点
+		ast::AstNode *node = syntax_list->at(i).program;
+
+		// 放入总节点中
+		(*program) += *(node->Children());
+
+		// node只是暂存了ast，需要被删除
+		// 为了防止删除时将子节点也删除，因此需要先清空字节点列表
+		node->Children()->clear();
+		delete node;
+	}
+
+	ast::AstNode *node = new ast::AstProgram(program);
+
+	// 初始化node
+	node->filename = String();
+	node->lineNo = -1;
+
+	return node;
+}
+
 } // namespace stamon::c

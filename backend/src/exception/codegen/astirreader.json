@@ -1,0 +1,18 @@
+{
+  "name": "AstIrReaderException.cpp",
+  "error": [
+    {
+      "type": "FormatError",
+      "arg": [],
+      "msg": ["not stvc"],
+      "doc": "该文件的魔数不是0xABDB，由此推断该文件不是AST-IR字节码，请检查编码文件或重新编译。"
+    },
+    {
+      "type": "NodeError",
+      "arg": [],
+      "msg": ["unknown ast-ir node"],
+      "doc": "检测到未知的AST-IR单元，请检查编码文件或重新编译。"
+    }
+  ],
+  "warning": []
+}
