@@ -4,7 +4,16 @@ import suidPlugin from "@suid/vite-plugin"
 import { ViteMinifyPlugin } from 'vite-plugin-minify'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// 构建时间取配置求值时刻并换算到 UTC+8，避免不同时区的构建机产出不同时间
+// toISOString 按 UTC 输出且自带补零，整体偏移 8 小时后即为北京时间
+const buildTime = new Date(Date.now() + 8 * 60 * 60 * 1000)
+  .toISOString().slice(0, 19).replace('T', ' ')
+const BUILD_TIME = `UTC+8（北京时间）${buildTime}`
+
 export default defineConfig({
+  define: {
+    __BUILD_TIME__: JSON.stringify(BUILD_TIME)
+  },
   plugins: [
     suidPlugin(),
     solidPlugin(),

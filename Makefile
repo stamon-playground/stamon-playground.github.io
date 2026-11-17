@@ -74,8 +74,8 @@ backend: stamon-lib
 	-s ENVIRONMENT='web' \
 	-s USE_ES6_IMPORT_META=0 \
 	-s ALLOW_MEMORY_GROWTH=1 \
-	-s "EXPORTED_RUNTIME_METHODS=stringToNewUTF8" \
-	-s "EXPORTED_FUNCTIONS=_malloc,_free,_RunStamon" \
+	-s "EXPORTED_RUNTIME_METHODS=stringToNewUTF8,UTF8ToString" \
+	-s "EXPORTED_FUNCTIONS=_malloc,_free,_runStamon,_getVersion" \
 	--js-library $(JS_LIBRARY)
 
 frontend:

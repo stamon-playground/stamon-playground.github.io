@@ -13,11 +13,15 @@ import ListItemText from '@suid/material/ListItemText'
 import Checkbox from '@suid/material/Checkbox'
 import Link from '@suid/material/Link'
 import IconButton from '@suid/material/IconButton'
+import Dialog from '@suid/material/Dialog'
+import DialogTitle from '@suid/material/DialogTitle'
+import DialogContent from '@suid/material/DialogContent'
+import Stack from '@suid/material/Stack'
 import { createPalette } from "@suid/material/styles/createPalette"
 import { ThemeProvider, createTheme } from '@suid/material/styles'
 import useMediaQuery from '@suid/material/useMediaQuery'
 import SvgIcon from "@suid/material/SvgIcon"
-import { mdiGithub, mdiMenu } from '@mdi/js'
+import { mdiGithub, mdiMenu, mdiBookOpenVariant, mdiHelpCircleOutline, mdiClose } from '@mdi/js'
 import { useDrag } from 'solid-gesture'
 import { Editor, languageMap } from "solid-prism-editor"
 import { basicSetup } from "solid-prism-editor/setups"
@@ -135,6 +139,12 @@ import std;
 
 println("Hello world!");`
 
+const LINKS = {
+  repository: "https://github.com/CLimber-Rong/stamon/tree/legacy",
+  tutorial: "https://github.com/CLimber-Rong/stamon/wiki",
+  source: "https://github.com/stamon-playground/stamon-playground.github.io/",
+}
+
 const getInitialCode = () => {
   const code = localStorage.getItem("inputCode");
   return code ? code : exampleCode;
@@ -150,10 +160,40 @@ const saveBoolLocalStorage = (key, value) => {
   localStorage.setItem(key, value ? "true" : "false");
 }
 
+const AboutItem = (props) => (
+  <Box>
+    <Typography variant="body2" color="text.secondary">{props.label}</Typography>
+    <Typography variant="body2" sx={{ wordBreak: "break-all" }}>{props.children}</Typography>
+  </Box>
+)
+
+const AboutDialog = (props) => (
+  <Dialog open={props.open} onClose={props.onClose} maxWidth="xs" fullWidth>
+    <DialogTitle
+      sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}
+    >
+      关于
+      <IconButton size="small" aria-label="关闭" onClick={props.onClose}>
+        <SvgIcon fontSize="small"><path d={mdiClose} /></SvgIcon>
+      </IconButton>
+    </DialogTitle>
+    <DialogContent>
+      <Stack spacing={2}>
+        <AboutItem label="查看Playground源码">
+          <Link href={LINKS.source} target="_blank">{LINKS.source}</Link>
+        </AboutItem>
+        <AboutItem label="Stamon版本号">{props.version}</AboutItem>
+        <AboutItem label="Playground构建时间">{__BUILD_TIME__}</AboutItem>
+      </Stack>
+    </DialogContent>
+  </Dialog>
+)
+
 export default () => {
   const [input, setInput] = createSignal("");
   const [output, setOutput] = createSignal("");
   const [running, setRunning] = createSignal(false);
+  const [version, setVersion] = createSignal("");
   const [titleClickTimes, setTitleClickTimes] = createSignal(0);
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
@@ -202,6 +242,9 @@ export default () => {
     const data = e.data;
     if (data.type === 'print') {
       setOutput(output() + data.output)
+    }
+    if (data.type === 'version') {
+      setVersion(data.version)
     }
     if (data.type === 'finish') {
       setRunning(false)
@@ -256,6 +299,13 @@ export default () => {
   const [anchorEl, setAnchorEl] = createSignal(null);
   const openMenu = () => Boolean(anchorEl());
   const handleClose = () => setAnchorEl(null);
+
+  const [aboutOpen, setAboutOpen] = createSignal(false);
+
+  const handleAboutOpen = () => {
+    setAboutOpen(true)
+    handleClose()
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -324,16 +374,34 @@ export default () => {
               <MenuItem
                 dense
                 component={Link}
-                href="https://github.com/CLimber-Rong/stamon/tree/legacy" target="_blank"
+                href={LINKS.repository} target="_blank"
               >
                 <ListItemIcon>
                   <SvgIcon><path d={mdiGithub} /></SvgIcon>
                 </ListItemIcon>
                 <ListItemText>Github</ListItemText>
               </MenuItem>
+              <MenuItem
+                dense
+                component={Link}
+                href={LINKS.tutorial} target="_blank"
+              >
+                <ListItemIcon>
+                  <SvgIcon><path d={mdiBookOpenVariant} /></SvgIcon>
+                </ListItemIcon>
+                <ListItemText>教程</ListItemText>
+              </MenuItem>
+              <Divider />
+              <MenuItem dense onClick={handleAboutOpen}>
+                <ListItemIcon>
+                  <SvgIcon><path d={mdiHelpCircleOutline} /></SvgIcon>
+                </ListItemIcon>
+                <ListItemText>关于</ListItemText>
+              </MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>
+        <AboutDialog open={aboutOpen()} onClose={() => setAboutOpen(false)} version={version()} />
         <Box
           ref={containerRef}
           sx={{
