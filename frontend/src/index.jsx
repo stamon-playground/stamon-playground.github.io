@@ -3,7 +3,11 @@ import { render } from 'solid-js/web';
 import App from './App';
 import { registerSW } from 'virtual:pwa-register'
 
-registerSW({ immediate: true })
+// 新版本只会在页面启动时被发现，此时立即确认更新，避免打断正在编辑的会话
+const updateServiceWorker = registerSW({
+  immediate: true,
+  onNeedRefresh: () => updateServiceWorker()
+})
 
 const root = document.getElementById('root');
 
