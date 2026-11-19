@@ -56,8 +56,11 @@ PLAYGROUND_EXPORT(int) runStamon(const char *code) {
 
 PLAYGROUND_EXPORT(const char *) getVersion() {
 	// 版本号即 Stamon.hpp 中 VerX/VerY/VerZ 的来源，编码为 X.Y.Z 供前端显示
-	static const String version = toString(config::STAMON_VER_X) + "."
-			+ toString(config::STAMON_VER_Y) + "." + toString(config::STAMON_VER_Z);
+	static const String version = toString(config::STAMON_VER_X)
+								+ "."
+								+ toString(config::STAMON_VER_Y)
+								+ "."
+								+ toString(config::STAMON_VER_Z);
 
 	return version.getstr(); // 静态量保证指针长期有效
 }
