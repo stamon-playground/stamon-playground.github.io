@@ -458,6 +458,7 @@ export default () => {
           <EditorWrapper>
             <Editor
               readOnly
+              onMount={(editor) => { editor.textarea.readOnly = true }}
               value={output()}
               lineNumbers={false}
               wordWrap={wordWrap()}
