@@ -236,26 +236,36 @@ export default () => {
     setAnchorEl(null)
   }
 
-  const worker = new StamonWorker()
+  // worker 可变：每次运行都使用独立线程，取消时直接终止并重建，防止死循环卡死
+  let worker
 
-  worker.onmessage = (e) => {
-    const data = e.data;
-    if (data.type === 'print') {
-      setOutput(output() + data.output)
+  const createWorker = () => {
+    const instance = new StamonWorker()
+    instance.onmessage = (e) => {
+      const data = e.data
+      if (data.type === 'print') setOutput(output() + data.output)
+      if (data.type === 'version') setVersion(data.version)
+      if (data.type === 'finish') setRunning(false)
     }
-    if (data.type === 'version') {
-      setVersion(data.version)
-    }
-    if (data.type === 'finish') {
-      setRunning(false)
-    }
+    return instance
   }
 
-  const handleRunCode = async () => {
+  worker = createWorker()
+
+  const runCode = () => {
     setOutput("")
     setRunning(true)
     worker.postMessage({ type: 'run', input: input() })
   }
+
+  const cancelRun = () => {
+    // 终止线程会同时销毁死循环中的 WASM 实例，随后重建以准备下一次运行
+    worker.terminate()
+    worker = createWorker()
+    setRunning(false)
+  }
+
+  const handleRunClick = () => (running() ? cancelRun() : runCode())
 
   const EditorWrapper = (props) => (
     <Box
@@ -327,12 +337,11 @@ export default () => {
               </Show>
             </Typography>
             <Button
-              color="inherit"
+              color={running() ? "error" : "inherit"}
               variant="outlined"
-              onClick={handleRunCode}
-              disabled={running()}
+              onClick={handleRunClick}
             >
-              {running() ? "Running" : "Run"}
+              {running() ? "取消运行" : "运行"}
             </Button>
             <IconButton
               aria-controls={openMenu() ? "function-menu" : undefined}
