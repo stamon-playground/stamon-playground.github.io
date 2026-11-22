@@ -4,6 +4,7 @@ import App from './App';
 import { registerSW } from 'virtual:pwa-register'
 
 const root = document.getElementById('root');
+const loading = document.getElementById('app-loading');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error(
@@ -11,7 +12,10 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-const renderApp = () => render(() => <App />, root)
+const renderApp = () => {
+  if (loading) loading.remove()
+  render(() => <App />, root)
+}
 
 // 注册前是否已有控制器：首次访问（含首次安装 SW）没有旧界面可闪，直接渲染
 const hadController = 'serviceWorker' in navigator && Boolean(navigator.serviceWorker.controller)
