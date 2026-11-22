@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="shortcut icon" type="image/ico" href="/favicon.ico" />
     <title>Stamon Playground</title>
+    <script>
+      // 与 App 使用相同的 localStorage.darkMode / 系统偏好设置，尽早决定主题
+      (() => {
+        const value = localStorage.getItem("darkMode");
+        const dark = value === "true" || (value !== "false" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      })();
+    </script>
     <style>
       html, body { margin: 0; min-height: 100%; }
       #app-loading {
@@ -20,7 +28,8 @@
         background: #fff;
         font-size: 16px;
       }
-      #app-loading[data-theme="dark"] { color: #e6edf3; background: #010409; }
+      #app-loading[data-theme="dark"],
+      html[data-theme="dark"] #app-loading { color: #e6edf3; background: #010409; }
       #app-loading .spinner {
         width: 42px;
         height: 42px;
@@ -44,13 +53,6 @@
       <div>加载中....</div>
     </div>
     <div id="root"></div>
-    <script>
-      (() => {
-        const value = localStorage.getItem("darkMode");
-        const dark = value === "true" || (value !== "false" && matchMedia("(prefers-color-scheme: dark)").matches);
-        document.getElementById("app-loading").dataset.theme = dark ? "dark" : "light";
-      })();
-    </script>
     <script src="/src/index.jsx" type="module"></script>
   </body>
 </html>

@@ -198,7 +198,10 @@ export default () => {
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
   const [darkMode, setDarkMode] = createSignal(getBoolLocalStorage("darkMode") ?? prefersDarkMode);
-  onMount(() => changeEditorTheme(darkMode()));
+  onMount(() => {
+    changeEditorTheme(darkMode())
+    syncThemeAttribute(darkMode())
+  });
 
   const palette = createMemo(() => {
     const mode = darkMode() ? "dark" : "light"
@@ -210,6 +213,10 @@ export default () => {
 
   const isSmallScreen = () => window.innerWidth < theme.breakpoints.values.md
   const [wordWrap, setWordWrap] = createSignal(getBoolLocalStorage("wordWrap") ?? isSmallScreen());
+
+  const syncThemeAttribute = (dark) => {
+    document.documentElement.dataset.theme = dark ? "dark" : "light"
+  }
 
   const changeEditorTheme = (darkMode) => {
     const theme = darkMode ? GithubDark : GithubLight
@@ -227,6 +234,7 @@ export default () => {
     setDarkMode(nextDarkMode)
     saveBoolLocalStorage("darkMode", nextDarkMode)
     changeEditorTheme(nextDarkMode)
+    syncThemeAttribute(nextDarkMode)
     setAnchorEl(null)
   }
 
