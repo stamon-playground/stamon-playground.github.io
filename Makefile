@@ -37,9 +37,9 @@ BASIC_LINK =	-I backend/include/pure \
 
 # Playground的移植接口实现
 PLAYGROUND_LINK =	-I backend/include/PlaygroundUtility \
-					-I backend/include/FileReader/web-playground \
-					-I backend/include/FileWriter/web-playground \
-					-I backend/include/BasicIo/web-playground
+					-I backend/include/FileReader/playground \
+					-I backend/include/FileWriter/playground \
+					-I backend/include/BasicIo/playground
 
 # 与Playground交互无关的模块采用stdcpp实现
 STDCPP_LINK =	-I backend/include/ArrayList/stdcpp \
@@ -64,7 +64,7 @@ stamon-lib:
 	$(call COPY_FILE,backend/LICENSE,frontend/public/stamon-lib/LICENSE)
 
 backend: stamon-lib
-	$(COMPILER) backend/src/Main.cpp \
+	$(COMPILER) backend/src/PlaygroundMain.cpp \
 	-o frontend/src/stamon.js \
 	-std=$(STD) \
 	-Oz \
