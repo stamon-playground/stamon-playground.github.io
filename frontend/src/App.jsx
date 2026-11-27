@@ -270,6 +270,7 @@ export default () => {
   const EditorWrapper = (props) => (
     <Box
       sx={{
+        position: 'relative',
         minHeight: 0,
         minWidth: 0,
         border: `2px solid ${theme.palette.divider}`,
@@ -461,10 +462,24 @@ export default () => {
               onMount={(editor) => { editor.textarea.readOnly = true }}
               value={output()}
               lineNumbers={false}
-              wordWrap={wordWrap()}
+              wordWrap
               extensions={[]}
               style={{ height: '100%' }}
             />
+            <Show when={!output()}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 12,
+                  pointerEvents: 'none',
+                  color: 'text.disabled',
+                  fontStyle: 'italic',
+                }}
+              >
+                没有任何输出...
+              </Box>
+            </Show>
           </EditorWrapper>
         </Box>
       </Box>
